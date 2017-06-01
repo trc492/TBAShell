@@ -1,7 +1,7 @@
 # TBAShell
 A shell interface to TheBlueAlliance.com.
 
-Syntax: <Command> [<ParamList>]
+Syntax: \<Command\> [\<ParamList\>]
 <Command>:
         ?                                       - Print the short help message.
         help                                    - Print the long help message.
