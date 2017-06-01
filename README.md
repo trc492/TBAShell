@@ -1,23 +1,26 @@
 # TBAShell
-A shell interface to TheBlueAlliance.com.
+A shell interface to TheBlueAlliance.com API v3.
 
-Syntax: \<Command\> [\<ParamList\>]
+This program support two modes of operation:
+* Interactive mode - The program repeatedly prompts the user for a command line on the console and executes the command until the user types the 'quit' or 'exit' command.
+* Batch mode - The command line can be entered as arguments to the program. The program will execute the command line and exit when completed.
+
+The syntax of the command line is described below. Terms inside square brackets are optional. Terms inside curly braces describe a set of choices separated by '|'. Terms inside angle brackets should be substituted by the actual values. Otherwise, everything else should be typed as-is.
+
+Syntax: \<Command\>
 
 \<Command\>:
-
 * ?                                       - Print the short help message.
 * help                                    - Print the long help message.
 * quit                                    - Exit this program.
 * exit                                    - Exit this program.
-* show [\<Options\>] \<Model\>[\<params\>]      - Retrieve and show model data.
+* show [\<Options\>] \<Model\>              - Retrieve and show model data.
 * get \<Request\>                           - Send raw \<Request\> to the web server.
 
 \<Options\>:
-
 * -verbose={0|1|2}                        - Specifies output verbosity (0: minimum, 1: medium, 2: maximum).
 
 \<Model\>:
-
 * status[/\<TeamKey\>&\<EventKey\>]
 * teams/[{year=\<Year\>|team=\<TeamKey\>|district=\<DistrictKey\>|event=\<EventKey\>}]
 * events/{year=\<Year\>|event=\<EventKey\>|district=\<DistrictKey\>|team=\<TeamKey\>[&\<Year\>]}
@@ -36,7 +39,6 @@ Syntax: \<Command\> [\<ParamList\>]
 * social_media/\<TeamKey\>
 
 V3 \<Request\>:
-
 * status                                                  - TBA Status request.
 * teams[/\<Year\>]/\<PageNum\>[/simple|keys]                  - Team List Request with optional year and verbosity.
 * team/\<TeamKey\>[/simple]                                 - Single Team Request with optional verbosity.
