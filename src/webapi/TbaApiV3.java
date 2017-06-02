@@ -67,11 +67,11 @@ public class TbaApiV3 extends WebRequest
             "\tteam/<TeamKey>/districts\t\t\t\t- Team Districts Request.\n" +
             "\tteam/<TeamKey>/robots\t\t\t\t\t- Team Robots Request.\n" +
             "\tteam/<TeamKey>/events[/<Year>][/simple|keys]\t\t- Team Events Request with optional year and verbosity.\n" +
-            "\tteam/<TeamKey>/event/<EventKey>/matches[/simple|key]\t- Team Event Matches Request with optional verbosity.\n" +
+            "\tteam/<TeamKey>/event/<EventKey>/matches[/simple|keys]\t- Team Event Matches Request with optional verbosity.\n" +
             "\tteam/<TeamKey>/event/<EventKey>/awards\t\t\t- Team Event Awards Request.\n" +
             "\tteam/<TeamKey>/event/<EventKey>/status\t\t\t- Team Event Status Request.\n" +
             "\tteam/<TeamKey>/awards[/<Year>]\t\t\t\t- Team Awards Request with optional year.\n" +
-            "\tteam/<TeamKey>/matches[/<Year>][/simple|key]\t\t- Team Matches Request with optional year and verbosity.\n" +
+            "\tteam/<TeamKey>/matches[/<Year>][/simple|keys]\t\t- Team Matches Request with optional year and verbosity.\n" +
             "\tteam/<TeamKey>/media/<Year>\t\t\t\t- Team Media Request.\n" +
             "\tteam/<TeamKey>/social_media\t\t\t\t- Team Social Media Request.\n" +
             "\tevents/<Year>[/simple|keys]\t\t\t\t- Event List Request with optional verbosity.\n" +

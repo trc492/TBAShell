@@ -105,7 +105,7 @@ public class TBAShell
         {
             tbaApi.printData(tbaApi.get(tokens[1]), null, null);
         }
-        else if (tokens[0].equals("show") && (tokens.length == 2 || tokens.length == 3))
+        else if (tokens[0].equals("list") && (tokens.length == 2 || tokens.length == 3))
         {
             String request;
             int verboseLevel = 1;
@@ -823,19 +823,19 @@ public class TBAShell
     private static void printHelpMsg(boolean longVersion)
     {
         System.out.print(
-            "\nSyntax: <Command> [<ParamList>]\n" +
+            "\nSyntax: <Command>\n" +
             "<Command>:\n" +
-            "\t?\t\t\t\t\t- Print the short help message.\n" +
-            "\thelp\t\t\t\t\t- Print the long help message.\n" +
-            "\tquit\t\t\t\t\t- Exit this program.\n" +
-            "\texit\t\t\t\t\t- Exit this program.\n" +
-            "\tshow [<Options>] <Model>[<params>]\t- Retrieve and show model data.\n" +
-            "\tget <Request>\t\t\t\t- Send raw <Request> to the web server.\n");
+            "\t?\t\t\t\t- Print the short help message.\n" +
+            "\thelp\t\t\t\t- Print the long help message.\n" +
+            "\tquit\t\t\t\t- Exit this program.\n" +
+            "\texit\t\t\t\t- Exit this program.\n" +
+            "\tlist [<Options>] <Model>\t- Retrieve and list model data.\n" +
+            "\tget <Request>\t\t\t- Send raw <Request> to the web server.\n");
         if (longVersion)
         {
             System.out.print(
                 "<Options>:\n" +
-                "\t-verbose={0|1|2}\t\t\t- Specifies output verbosity (0: minimum, 1: medium, 2: maximum).\n" +
+                "\t-verbose={0|1|2}\t\t- Specifies output verbosity (0: minimum, 1: medium, 2: maximum).\n" +
                 "<Model>:\n" +
                 "\tstatus[/<TeamKey>&<EventKey>]\n" +
                 "\tteams/[{year=<Year>|team=<TeamKey>|district=<DistrictKey>|event=<EventKey>}]\n" +
