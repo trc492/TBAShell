@@ -1,24 +1,24 @@
-# TBAShell
+ # TBAShell
 A shell interface to TheBlueAlliance.com API v3.
 
 This program support two modes of operation:
 * Interactive mode - The program repeatedly prompts the user for a command line on the console and executes the command until the user types the 'quit' or 'exit' command.
-* Batch mode - The command line can be entered as arguments to the program. The program will execute the command line and exit when completed.
+* Batch mode - The command line can be entered as arguments to the program. The program will execute the command line and exit when completed. In other words, you can run this program in a script such as a batch file to execute a single command.
 
 The syntax of the command line is described below. Terms inside square brackets are optional. Terms inside curly braces describe a set of choices separated by '|'. Terms inside angle brackets should be substituted by the actual values. Otherwise, everything else should be typed as-is.
 
 Syntax: \<Command\>
 
 \<Command\>:
-* ?                                       - Print the short help message.
-* help                                    - Print the long help message.
-* quit                                    - Exit this program.
-* exit                                    - Exit this program.
-* show [\<Options\>] \<Model\>              - Retrieve and show model data.
-* get \<Request\>                           - Send raw \<Request\> to the web server.
+* ?                               - Print the short help message.
+* help                            - Print the long help message.
+* quit                            - Exit this program.
+* exit                            - Exit this program.
+* list [\<Options\>] \<Model\>      - Retrieve and show model data.
+* get \<Request\>                   - Send raw \<Request\> to the web server.
 
 \<Options\>:
-* -verbose={0|1|2}                        - Specifies output verbosity (0: minimum, 1: medium, 2: maximum).
+* -verbose={0|1|2}                - Specifies output verbosity (0: minimum, 1: medium, 2: maximum).
 
 \<Model\>:
 * status[/\<TeamKey\>&\<EventKey\>]
@@ -46,11 +46,11 @@ V3 \<Request\>:
 * team/\<TeamKey\>/districts                                - Team Districts Request.
 * team/\<TeamKey\>/robots                                   - Team Robots Request.
 * team/\<TeamKey\>/events\[/\<Year\>\][/simple|keys]            - Team Events Request with optional year and verbosity.
-* team/\<TeamKey\>/event/\<EventKey\>/matches[/simple|key]    - Team Event Matches Request with optional verbosity.
+* team/\<TeamKey\>/event/\<EventKey\>/matches[/simple|keys]   - Team Event Matches Request with optional verbosity.
 * team/\<TeamKey\>/event/\<EventKey\>/awards                  - Team Event Awards Request.
 * team/\<TeamKey\>/event/\<EventKey\>/status                  - Team Event Status Request.
 * team/\<TeamKey\>/awards\[/\<Year\>\]                          - Team Awards Request with optional year.
-* team/\<TeamKey\>/matches\[/\<Year\>\][/simple|key]            - Team Matches Request with optional year and verbosity.
+* team/\<TeamKey\>/matches\[/\<Year\>\][/simple|keys]           - Team Matches Request with optional year and verbosity.
 * team/\<TeamKey\>/media/\<Year\>                             - Team Media Request.
 * team/\<TeamKey\>/social_media                             - Team Social Media Request.
 * events/\<Year\>[/simple|keys]                             - Event List Request with optional verbosity.
