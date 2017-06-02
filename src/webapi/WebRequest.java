@@ -124,11 +124,17 @@ public class WebRequest
         JsonStructure jsonData = null;
         String urlString = apiBase + request;
 
+        //
+        // Form the URL string.
+        //
         if (header != null)
         {
             urlString += header;
         }
 
+        //
+        // Check our cache if we have sent the same URL previously and retrieve its last modified time.
+        //
         TimedData timedData = cachedRequests.get(urlString);
         long lastModified = timedData != null? timedData.lastModified: 0;
 
@@ -143,6 +149,9 @@ public class WebRequest
             System.out.println(e.getMessage());
         }
 
+        //
+        // Open the web connection.
+        //
         HttpURLConnection conn = null;
         if (url != null)
         {
@@ -164,6 +173,11 @@ public class WebRequest
                 conn.addRequestProperty(p.key, p.value);
             }
 
+            //
+            // Send the web request. If we have it in our cache, send the last modified time so the web service
+            // will give us data back only if it has changed since last modified time. If we don't have it in our
+            // cache, last modified time will be zero and the web service will reply with data.
+            //
             try 
             {
                 System.out.print("Sending request <" + urlString + ">: ");
@@ -173,6 +187,9 @@ public class WebRequest
                 int responseCode = conn.getResponseCode();
                 if (responseCode == 200)
                 {
+                    //
+                    // Received "OK" response with data. Update cache with the new data.
+                    //
                     try (InputStream is = conn.getInputStream();
                          JsonReader rdr = Json.createReader(is))
                    {
@@ -184,10 +201,12 @@ public class WebRequest
                    {
                        System.out.println("Failed to open input stream.\n" + e.getMessage());
                    }
-                    
                 }
                 else if (responseCode == 304 && timedData != null)
                 {
+                    //
+                    // Received "Not Modified" response with no data, return cached data from last time.
+                    //
                     jsonData = timedData.data;
                 }
                 else
@@ -200,8 +219,8 @@ public class WebRequest
                 System.out.println("Failed to open connection to <" + urlString + ">.");
                 System.out.println(e.getMessage());
             }
-
         }
+
         return jsonData;
     }   //get
 
