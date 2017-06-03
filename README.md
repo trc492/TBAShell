@@ -2,8 +2,8 @@
 ## A shell interface to TheBlueAlliance.com API v3.
 
 This program support two modes of operation:
-* Interactive mode - The program repeatedly prompts the user for a command line on the console and executes the command until the user types the 'quit' or 'exit' command.
-* Batch mode - The command line can be entered as arguments to the program. The program will execute the command line and exit when completed. In other words, you can run this program in a script such as a batch file to execute a single command.
+- Interactive mode: The program repeatedly prompts the user for a command line on the console and executes the command until the user types the 'quit' or 'exit' command.
+- Batch mode: The command line can be entered as arguments to the program. The program will execute the command line and exit when completed. In other words, you can run this program in a script such as a batch file to execute a single command.
 
 The syntax of the command line is described below. Terms inside square brackets are optional. Terms inside curly braces describe a set of choices separated by '|'. Terms inside angle brackets should be substituted by the actual values. Otherwise, everything else should be typed as-is.
 ```
