@@ -3,8 +3,10 @@
 
 This program support two modes of operation:
 - **Interactive mode:** The program repeatedly prompts the user for a command line on the console and executes the command until the user types the 'quit' or 'exit' command.
-- **Batch mode:** The command line can be entered as arguments to the program. The program will execute the command line and exit when completed. In other words, you can run this program in a script such as a batch file to execute a single command.
-
+- **Batch mode:** The command line can be entered as arguments to the program. The program will execute the command line and exit when completed. In other words, you can run this program in a script such as a batch file to execute a single command. For example, one may type the following line in a batch file.
+```
+java -jar TBAShell.jar list teams/team=frc492
+```
 The syntax of the command line is described below. Terms inside _square brackets_ are optional. Terms inside _curly braces_ describe a set of choices separated by '|'. Terms inside _angle brackets_ should be substituted by the actual values. Otherwise, everything else should be typed as-is.
 ```
 Syntax: <Command>
