@@ -122,7 +122,7 @@ public class WebRequest
     public JsonStructure get(String request, String header)
     {
         JsonStructure jsonData = null;
-        String urlString = apiBase + request;
+        String urlString = apiBase + "/" + request;
 
         //
         // Form the URL string.

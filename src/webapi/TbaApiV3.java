@@ -34,7 +34,7 @@ import javax.json.JsonValue;
  */
 public class TbaApiV3 extends WebRequest
 {
-    private static final String TBA_API_BASE = "https://www.thebluealliance.com/api/v3/";
+    private static final String TBA_API_BASE = "https://www.thebluealliance.com/api/v3";
     private static final String TBA_AUTH_KEY = "UQmqq10GkWyNGmsSuN1WvKp0jpG0x4tSfaNc46E6ZGemWK6JL4sM8mPWZthOpHDN";
     private String header = null;
 
