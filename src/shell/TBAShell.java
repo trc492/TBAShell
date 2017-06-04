@@ -1238,7 +1238,7 @@ public class TBAShell
             "\tget <Request>\t\t\t- Send raw <Request> to the web server.\n");
         System.out.print(
             "<Options>:\n" +
-            "\t-verbose=(0|1|2)\t\t- Specifies output verbosity (0: minimum, 1: medium, 2: maximum).\n" +
+            "\t-verbose=(0|1|2)\t\t- Specifies output verbosity (0: minimum, 1: medium, 2: maximum - default is 1).\n" +
             "<Model>:\n" +
             "\tstatus[?team=<TeamKey>&event=<EventKey>]\n" +
             "\tteams?[(year=<Year>|team=<TeamKey>|event=<EventKey>|district=<DistrictKey>)]\n" +
