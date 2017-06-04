@@ -64,7 +64,7 @@ public class TBACommand
                     filters.put(pair[0], pair[1]);
                 }
             }
-        }
+        }   //FilterSet
 
         /**
          * This method finds the filter with the specified key and returns the filter value.
@@ -96,7 +96,7 @@ public class TBACommand
      *
      * @param authorId specifies the author ID.
      * @param appName specifies the application name.
-     * @param appVersion specifies the applicaton version.
+     * @param appVersion specifies the application version.
      */
     public TBACommand(String authorId, String appName, String appVersion)
     {
@@ -139,13 +139,13 @@ public class TBACommand
     /**
      * This method processes a TBA request command.
      * The syntax of a basic TBA request command is:
-     * Command   ::= [-<Options>] <Model>?[<FilterSet>]
-     * Options   ::= Specifies command options such as verbose level.
-     * Model     ::= Specifies data model such as teams, events, districts, matches etc.
-     * FilterSet ::= <Filter>{&<Filter>}
-     * Filter    ::= <Key>=<Value>
-     * Key       ::= Specifies the filter key.
-     * Value     ::= Specifies the filter value.
+     *  Command     ::= [-<Options>] <Model>?[<FilterSet>]
+     *  Options     ::= Specifies command options such as verbose level.
+     *  Model       ::= Specifies data model such as teams, events, districts, matches etc.
+     *  FilterSet   ::= <Filter>{&<Filter>}
+     *  Filter      ::= <Key>=<Value>
+     *  Key         ::= Specifies the filter key.
+     *  Value       ::= Specifies the filter value.
      *
      * @param tokens specifies the tokens split from the command line.
      */
