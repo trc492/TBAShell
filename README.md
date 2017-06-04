@@ -20,23 +20,23 @@ Syntax: <Command>
 <Options>:
         -verbose={0|1|2}                - Specifies output verbosity (0: minimum, 1: medium, 2: maximum).
 <Model>:
-        status[/<TeamKey>&<EventKey>]
-        teams/[{year=<Year>|team=<TeamKey>|district=<DistrictKey>|event=<EventKey>}]
-        events/{year=<Year>|event=<EventKey>|district=<DistrictKey>|team=<TeamKey>[&<Year>]}
-        districts/{year=<Year>|team=<TeamKey>}
-        matches/{match=<MatchKey>|event=<EventKey>[&<TeamKey>]|team=<TeamKey>&<Year>}
-        awards/{event=<EventKey>[&<TeamKey>]|team=<TeamKey>[&<Year>]}
-        rankings/{district=<DistrictKey>|event=<EventKey>}
-        oprs/<EventKey>
-        district_points/<EventKey>
-        insights/<EventKey>
-        predictions/<EventKey>
-        alliances/<EventKey>
-        years_participated/<TeamKey>
-        robots/<TeamKey>
-        media/<TeamKey>&<Year>
-        social_media/<TeamKey>
-V3 <Request>:
+        status[?team=<TeamKey>&event=<EventKey>]
+        teams?[{year=<Year>|team=<TeamKey>|event=<EventKey>|district=<DistrictKey>}]
+        events?{year=<Year>|team=<TeamKey>[&year=<Year>]|event=<EventKey>|district=<DistrictKey>}
+        districts?{year=<Year>|team=<TeamKey>}
+        matches?{team=<TeamKey>&year=<Year>|event=<EventKey>[&team=<TeamKey>]|match=<MatchKey>}
+        awards?{team=<TeamKey>[&year=<Year>]|event=<EventKey>[&team=<TeamKey>]}
+        rankings?{event=<EventKey>|district=<DistrictKey>}
+        oprs?event=<EventKey>
+        district_points?event=<EventKey>
+        insights?event=<EventKey>
+        predictions?event=<EventKey>
+        alliances?event=<EventKey>
+        years_participated?team=<TeamKey>
+        robots?team=<TeamKey>
+        media?team=<TeamKey>&year=<Year>
+        social_media?team=<TeamKey>
+<Request>: (version 3)
         status                                                  - TBA Status request.
         teams[/<Year>]/<PageNum>[/{simple|keys}]                - Team List Request with optional year and verbosity.
         team/<TeamKey>[/simple]                                 - Single Team Request with optional verbosity.
