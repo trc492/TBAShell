@@ -52,7 +52,7 @@ public class TBAShell
             if (args.length == 0)
             {
                 //
-                // Interactive mode: prompt the user for the command, process it and repeats.
+                // Interactive mode: prompt the user for the command, process it and repeat until quit.
                 //
                 System.out.print("\nTBA Command (? for help): ");
                 String command = console.nextLine().trim();
