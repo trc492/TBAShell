@@ -61,34 +61,34 @@ public class TbaApiV3 extends WebRequest
         System.out.print(
             "<Request>: (version 3)\n" +
             "\tstatus\t\t\t\t\t\t\t- TBA Status request.\n" +
-            "\tteams[/<Year>]/<PageNum>[/{simple|keys}]\t\t- Team List Request with optional year and verbosity.\n" +
+            "\tteams[/<Year>]/<PageNum>[/(simple|keys)]\t\t- Team List Request with optional year and verbosity.\n" +
             "\tteam/<TeamKey>[/simple]\t\t\t\t\t- Single Team Request with optional verbosity.\n" +
             "\tteam/<TeamKey>/years_participated\t\t\t- Team Years Participated Request.\n" +
             "\tteam/<TeamKey>/districts\t\t\t\t- Team Districts Request.\n" +
             "\tteam/<TeamKey>/robots\t\t\t\t\t- Team Robots Request.\n" +
-            "\tteam/<TeamKey>/events[/<Year>][/{simple|keys}]\t\t- Team Events Request with optional year and verbosity.\n" +
-            "\tteam/<TeamKey>/event/<EventKey>/matches[/{simple|keys}]\t- Team Event Matches Request with optional verbosity.\n" +
+            "\tteam/<TeamKey>/events[/<Year>][/(simple|keys)]\t\t- Team Events Request with optional year and verbosity.\n" +
+            "\tteam/<TeamKey>/event/<EventKey>/matches[/(simple|keys)]\t- Team Event Matches Request with optional verbosity.\n" +
             "\tteam/<TeamKey>/event/<EventKey>/awards\t\t\t- Team Event Awards Request.\n" +
             "\tteam/<TeamKey>/event/<EventKey>/status\t\t\t- Team Event Status Request.\n" +
             "\tteam/<TeamKey>/awards[/<Year>]\t\t\t\t- Team Awards Request with optional year.\n" +
-            "\tteam/<TeamKey>/matches[/<Year>][/{simple|keys}]\t\t- Team Matches Request with optional year and verbosity.\n" +
+            "\tteam/<TeamKey>/matches[/<Year>][/(simple|keys)]\t\t- Team Matches Request with optional year and verbosity.\n" +
             "\tteam/<TeamKey>/media/<Year>\t\t\t\t- Team Media Request.\n" +
             "\tteam/<TeamKey>/social_media\t\t\t\t- Team Social Media Request.\n" +
-            "\tevents/<Year>[/{simple|keys}]\t\t\t\t- Event List Request with optional verbosity.\n" +
+            "\tevents/<Year>[/(simple|keys)]\t\t\t\t- Event List Request with optional verbosity.\n" +
             "\tevent/<EventKey>[/simple]\t\t\t\t- Single Event Request with optional verbosity.\n" +
-            "\tevent/<EventKey>/teams[/{simple|keys}]\t\t\t- Event Teams Request with optional verbosity.\n" +
+            "\tevent/<EventKey>/teams[/(simple|keys)]\t\t\t- Event Teams Request with optional verbosity.\n" +
             "\tevent/<EventKey>/alliances\t\t\t\t- Event Alliances Request.\n" +
             "\tevent/<EventKey>/insights\t\t\t\t- Event Insights Request.\n" +
             "\tevent/<EventKey>/oprs\t\t\t\t\t- Event OPR Request.\n" +
             "\tevent/<EventKey>/predictions\t\t\t\t- Event Rankings Request.\n" +
             "\tevent/<EventKey>/rankings\t\t\t\t- Event Rankings Request.\n" +
             "\tevent/<EventKey>/district_points\t\t\t- Event District Points Request.\n" +
-            "\tevent/<EventKey>/matches[/{simple|keys}]\t\t- Event Matches Request with optional verbosity.\n" +
+            "\tevent/<EventKey>/matches[/(simple|keys)]\t\t- Event Matches Request with optional verbosity.\n" +
             "\tevent/<EventKey>/awards\t\t\t\t\t- Event Awards Request.\n" +
             "\tdistricts/<Year>\t\t\t\t\t- District List Request.\n" +
-            "\tdistrict/<DistrictKey>/teams[/{simple|keys}]\t\t- District Teams Request with optional verbosity.\n" +
+            "\tdistrict/<DistrictKey>/teams[/(simple|keys)]\t\t- District Teams Request with optional verbosity.\n" +
             "\tdistrict/<DistrictKey>/rankings\t\t\t\t- District Rankings Request.\n" +
-            "\tdistrict/<DistrictKey>/events[/{simple|keys}]\t\t- District Events Request with optional verbosity.\n" +
+            "\tdistrict/<DistrictKey>/events[/(simple|keys)]\t\t- District Events Request with optional verbosity.\n" +
             "\tmatch/<MatchKey>[/simple]\t\t\t\t- Match Request with optional verbosity.\n");
     }   //printApiHelp
 

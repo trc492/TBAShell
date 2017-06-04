@@ -1240,15 +1240,15 @@ public class TBAShell
         {
             System.out.print(
                 "<Options>:\n" +
-                "\t-verbose={0|1|2}\t\t- Specifies output verbosity (0: minimum, 1: medium, 2: maximum).\n" +
+                "\t-verbose=(0|1|2)\t\t- Specifies output verbosity (0: minimum, 1: medium, 2: maximum).\n" +
                 "<Model>:\n" +
                 "\tstatus[?team=<TeamKey>&event=<EventKey>]\n" +
-                "\tteams?[{year=<Year>|team=<TeamKey>|event=<EventKey>|district=<DistrictKey>}]\n" +
-                "\tevents?{year=<Year>|team=<TeamKey>[&year=<Year>]|event=<EventKey>|district=<DistrictKey>}\n" +
-                "\tdistricts?{year=<Year>|team=<TeamKey>}\n" +
-                "\tmatches?{team=<TeamKey>&year=<Year>|event=<EventKey>[&team=<TeamKey>]|match=<MatchKey>}\n" +
-                "\tawards?{team=<TeamKey>[&year=<Year>]|event=<EventKey>[&team=<TeamKey>]}\n" +
-                "\trankings?{event=<EventKey>|district=<DistrictKey>}\n" +
+                "\tteams?[(year=<Year>|team=<TeamKey>|event=<EventKey>|district=<DistrictKey>)]\n" +
+                "\tevents?(year=<Year>|team=<TeamKey>[&year=<Year>]|event=<EventKey>|district=<DistrictKey>)\n" +
+                "\tdistricts?(year=<Year>|team=<TeamKey>)\n" +
+                "\tmatches?(team=<TeamKey>&year=<Year>|event=<EventKey>[&team=<TeamKey>]|match=<MatchKey>)\n" +
+                "\tawards?(team=<TeamKey>[&year=<Year>]|event=<EventKey>[&team=<TeamKey>])\n" +
+                "\trankings?(event=<EventKey>|district=<DistrictKey>)\n" +
                 "\toprs?event=<EventKey>\n" +
                 "\tdistrict_points?event=<EventKey>\n" +
                 "\tinsights?event=<EventKey>\n" +
