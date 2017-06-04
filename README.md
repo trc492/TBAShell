@@ -18,7 +18,7 @@ Syntax: <Command>
         list [<Options>] <Model>        - Retrieve and list model data.
         get <Request>                   - Send raw <Request> to the web server.
 <Options>:
-        -verbose=(0|1|2)                - Specifies output verbosity (0: minimum, 1: medium, 2: maximum).
+        -verbose=(0|1|2)                - Specifies output verbosity (0: minimum, 1: medium, 2: maximum - default is 1).
 <Model>:
         status[?team=<TeamKey>&event=<EventKey>]
         teams?[(year=<Year>|team=<TeamKey>|event=<EventKey>|district=<DistrictKey>)]
