@@ -37,6 +37,7 @@ import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
+import javax.json.stream.JsonParsingException;
 
 /**
  * This class provides methods to send a request to the specified web server and retrieves/prints the replied data.
@@ -192,15 +193,22 @@ public class WebRequest
                     //
                     try (InputStream is = conn.getInputStream();
                          JsonReader rdr = Json.createReader(is))
-                   {
-                       jsonData = rdr.read();
-                       lastModified = conn.getLastModified();
-                       cachedRequests.put(urlString, new TimedData(jsonData, lastModified));
-                   }
-                   catch (IOException e)
-                   {
-                       System.out.println("Failed to open input stream.\n" + e.getMessage());
-                   }
+                    {
+                        jsonData = rdr.read();
+                        lastModified = conn.getLastModified();
+                        cachedRequests.put(urlString, new TimedData(jsonData, lastModified));
+                    }
+                    catch (IOException e)
+                    {
+                        System.out.println("Failed to open input stream.\n" + e.getMessage());
+                    }
+                    catch (JsonParsingException e)
+                    {
+                        //
+                        // Failed to parse data probably because there is no data.
+                        //
+                        jsonData = null;
+                    }
                 }
                 else if (responseCode == 304 && timedData != null)
                 {

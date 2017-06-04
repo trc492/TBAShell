@@ -59,7 +59,7 @@ public class TbaApiV3 extends WebRequest
     public void printApiHelp()
     {
         System.out.print(
-            "V3 <Request>:\n" +
+            "<Request>: (version 3)\n" +
             "\tstatus\t\t\t\t\t\t\t- TBA Status request.\n" +
             "\tteams[/<Year>]/<PageNum>[/{simple|keys}]\t\t- Team List Request with optional year and verbosity.\n" +
             "\tteam/<TeamKey>[/simple]\t\t\t\t\t- Single Team Request with optional verbosity.\n" +
@@ -124,7 +124,7 @@ public class TbaApiV3 extends WebRequest
 
         JsonStructure data = get(request, header);
 
-        if (data.getValueType() == JsonValue.ValueType.ARRAY && !((JsonArray)data).isEmpty())
+        if (data != null && data.getValueType() == JsonValue.ValueType.ARRAY && !((JsonArray)data).isEmpty())
         {
             for (JsonValue team: (JsonArray)data)
             {
@@ -389,7 +389,7 @@ public class TbaApiV3 extends WebRequest
     {
         JsonStructure data = get("event/" + eventKey + "/oprs", header);
 
-        if (verboseLevel < 2 && data != null)
+        if (data != null && verboseLevel < 2)
         {
             data = (JsonStructure)((JsonObject)data).get("oprs");
         }
@@ -419,7 +419,7 @@ public class TbaApiV3 extends WebRequest
     {
         JsonStructure data = get("event/" + eventKey + "/rankings", header);
 
-        if (verboseLevel < 2)
+        if (data != null && verboseLevel < 2)
         {
             data = (JsonStructure)((JsonObject)data).get("rankings");
         }
@@ -438,7 +438,7 @@ public class TbaApiV3 extends WebRequest
     {
         JsonStructure data = get("event/" + eventKey + "/district_points", header);
 
-        if (verboseLevel < 2)
+        if (data != null && verboseLevel < 2)
         {
             data = (JsonStructure)((JsonObject)data).get("points");
         }
