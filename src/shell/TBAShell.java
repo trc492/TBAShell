@@ -51,6 +51,9 @@ public class TBAShell
         {
             if (args.length == 0)
             {
+                //
+                // Interactive mode: prompt the user for the command, process it and repeats.
+                //
                 System.out.print("\nTBA Command (? for help): ");
                 String command = console.nextLine().trim();
                 if (command.equals("quit") || command.equals("exit"))
@@ -73,6 +76,9 @@ public class TBAShell
             }
             else
             {
+                //
+                // Batch mode: process the command and exit.
+                //
                 parser.processCommand(args);
                 done = true;
             }
