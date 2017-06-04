@@ -12,7 +12,7 @@ The syntax of the command line is described below. Terms inside _square brackets
 Syntax: <Command>
 <Command>:
         ?                               - Print the short help message.
-        help                            - Print the long help message.
+        help                            - Print the long help message (with raw request syntax).
         quit                            - Exit this program.
         exit                            - Exit this program.
         list [<Options>] <Model>        - Retrieve and list model data.
