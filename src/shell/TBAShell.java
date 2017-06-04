@@ -1231,33 +1231,33 @@ public class TBAShell
             "\nSyntax: <Command>\n" +
             "<Command>:\n" +
             "\t?\t\t\t\t- Print the short help message.\n" +
-            "\thelp\t\t\t\t- Print the long help message.\n" +
+            "\thelp\t\t\t\t- Print the long help message (with raw request syntax).\n" +
             "\tquit\t\t\t\t- Exit this program.\n" +
             "\texit\t\t\t\t- Exit this program.\n" +
             "\tlist [<Options>] <Model>\t- Retrieve and list model data.\n" +
             "\tget <Request>\t\t\t- Send raw <Request> to the web server.\n");
+        System.out.print(
+            "<Options>:\n" +
+            "\t-verbose=(0|1|2)\t\t- Specifies output verbosity (0: minimum, 1: medium, 2: maximum).\n" +
+            "<Model>:\n" +
+            "\tstatus[?team=<TeamKey>&event=<EventKey>]\n" +
+            "\tteams?[(year=<Year>|team=<TeamKey>|event=<EventKey>|district=<DistrictKey>)]\n" +
+            "\tevents?(year=<Year>|team=<TeamKey>[&year=<Year>]|event=<EventKey>|district=<DistrictKey>)\n" +
+            "\tdistricts?(year=<Year>|team=<TeamKey>)\n" +
+            "\tmatches?(team=<TeamKey>&year=<Year>|event=<EventKey>[&team=<TeamKey>]|match=<MatchKey>)\n" +
+            "\tawards?(team=<TeamKey>[&year=<Year>]|event=<EventKey>[&team=<TeamKey>])\n" +
+            "\trankings?(event=<EventKey>|district=<DistrictKey>)\n" +
+            "\toprs?event=<EventKey>\n" +
+            "\tdistrict_points?event=<EventKey>\n" +
+            "\tinsights?event=<EventKey>\n" +
+            "\tpredictions?event=<EventKey>\n" +
+            "\talliances?event=<EventKey>\n" +
+            "\tyears_participated?team=<TeamKey>\n" +
+            "\trobots?team=<TeamKey>\n" +
+            "\tmedia?team=<TeamKey>&year=<Year>\n" +
+            "\tsocial_media?team=<TeamKey>\n");
         if (longVersion)
         {
-            System.out.print(
-                "<Options>:\n" +
-                "\t-verbose=(0|1|2)\t\t- Specifies output verbosity (0: minimum, 1: medium, 2: maximum).\n" +
-                "<Model>:\n" +
-                "\tstatus[?team=<TeamKey>&event=<EventKey>]\n" +
-                "\tteams?[(year=<Year>|team=<TeamKey>|event=<EventKey>|district=<DistrictKey>)]\n" +
-                "\tevents?(year=<Year>|team=<TeamKey>[&year=<Year>]|event=<EventKey>|district=<DistrictKey>)\n" +
-                "\tdistricts?(year=<Year>|team=<TeamKey>)\n" +
-                "\tmatches?(team=<TeamKey>&year=<Year>|event=<EventKey>[&team=<TeamKey>]|match=<MatchKey>)\n" +
-                "\tawards?(team=<TeamKey>[&year=<Year>]|event=<EventKey>[&team=<TeamKey>])\n" +
-                "\trankings?(event=<EventKey>|district=<DistrictKey>)\n" +
-                "\toprs?event=<EventKey>\n" +
-                "\tdistrict_points?event=<EventKey>\n" +
-                "\tinsights?event=<EventKey>\n" +
-                "\tpredictions?event=<EventKey>\n" +
-                "\talliances?event=<EventKey>\n" +
-                "\tyears_participated?team=<TeamKey>\n" +
-                "\trobots?team=<TeamKey>\n" +
-                "\tmedia?team=<TeamKey>&year=<Year>\n" +
-                "\tsocial_media?team=<TeamKey>\n");
             tbaApi.printApiHelp();
         }
     }   //printHelpMsg
