@@ -24,6 +24,7 @@ package webapi;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -117,10 +118,12 @@ public class WebRequest
      * This method sends the GET request to the web server and returns the replied data if any.
      *
      * @param request specifies the request string.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @param header specifies the optional header, null if none.
      * @return replied JSON data, null if request failed.
+     * @throws RuntimeException when request failed.
      */
-    public JsonStructure get(String request, String header)
+    public JsonStructure get(String request, PrintStream statusOut, String header) throws RuntimeException
     {
         JsonStructure jsonData = null;
         String urlString = apiBase + "/" + request;
@@ -146,87 +149,84 @@ public class WebRequest
         }
         catch (MalformedURLException e)
         {
-            System.out.println("Invalid URL <" + urlString + ">.");
-            System.out.println(e.getMessage());
+            throw new RuntimeException("Invalid URL <" + urlString + ">.\n" + e.getMessage());
         }
 
         //
         // Open the web connection.
         //
         HttpURLConnection conn = null;
-        if (url != null)
+        try
         {
-            try
-            {
-                conn = (HttpURLConnection)url.openConnection();
-            }
-            catch (IOException e)
-            {
-                System.out.println("Failed to open connection to <" + urlString + ">.");
-                System.out.println(e.getMessage());
-            }
+            conn = (HttpURLConnection)url.openConnection();
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to open connection to <" + urlString + ">.\n" + e.getMessage());
         }
 
-        if (conn != null)
+        for (RequestProperty p: requestProperties)
         {
-            for (RequestProperty p: requestProperties)
-            {
-                conn.addRequestProperty(p.key, p.value);
-            }
+            conn.addRequestProperty(p.key, p.value);
+        }
 
-            //
-            // Send the web request. If we have it in our cache, send the last modified time so the web service
-            // will give us data back only if it has changed since last modified time. If we don't have it in our
-            // cache, last modified time will be zero and the web service will reply with data.
-            //
-            try 
+        //
+        // Send the web request. If we have it in our cache, send the last modified time so the web service
+        // will give us data back only if it has changed since last modified time. If we don't have it in our
+        // cache, last modified time will be zero and the web service will reply with data.
+        //
+        try
+        {
+            if (statusOut != null)
             {
-                System.out.print("Sending request <" + urlString + ">: ");
-                conn.setIfModifiedSince(lastModified);
-                conn.setRequestMethod("GET");
-                System.out.println(conn.getResponseMessage());
-                int responseCode = conn.getResponseCode();
-                if (responseCode == 200)
+                statusOut.print("Sending request <" + urlString + ">: ");
+            }
+            conn.setIfModifiedSince(lastModified);
+            conn.setRequestMethod("GET");
+            if (statusOut != null)
+            {
+                statusOut.println(conn.getResponseMessage());
+            }
+            int responseCode = conn.getResponseCode();
+            if (responseCode == 200)
+            {
+                //
+                // Received "OK" response with data. Update cache with the new data.
+                //
+                try (InputStream is = conn.getInputStream();
+                     JsonReader rdr = Json.createReader(is))
                 {
-                    //
-                    // Received "OK" response with data. Update cache with the new data.
-                    //
-                    try (InputStream is = conn.getInputStream();
-                         JsonReader rdr = Json.createReader(is))
-                    {
-                        jsonData = rdr.read();
-                        lastModified = conn.getLastModified();
-                        cachedRequests.put(urlString, new TimedData(jsonData, lastModified));
-                    }
-                    catch (IOException e)
-                    {
-                        System.out.println("Failed to open input stream.\n" + e.getMessage());
-                    }
-                    catch (JsonParsingException e)
-                    {
-                        //
-                        // Failed to parse data probably because there is no data.
-                        //
-                        jsonData = null;
-                    }
+                    jsonData = rdr.read();
+                    lastModified = conn.getLastModified();
+                    cachedRequests.put(urlString, new TimedData(jsonData, lastModified));
                 }
-                else if (responseCode == 304 && timedData != null)
+                catch (IOException e)
                 {
-                    //
-                    // Received "Not Modified" response with no data, return cached data from last time.
-                    //
-                    jsonData = timedData.data;
+                    throw new RuntimeException("Failed to open input stream.\n" + e.getMessage());
                 }
-                else
+                catch (JsonParsingException e)
                 {
-                    System.out.println("Request failed: " + conn.getResponseMessage() + " (" + responseCode + ")");
+                    //
+                    // Failed to parse data probably because there is no data.
+                    //
+                    jsonData = null;
                 }
             }
-            catch (IOException e)
+            else if (responseCode == 304 && timedData != null)
             {
-                System.out.println("Failed to open connection to <" + urlString + ">.");
-                System.out.println(e.getMessage());
+                //
+                // Received "Not Modified" response with no data, return cached data from last time.
+                //
+                jsonData = timedData.data;
             }
+            else
+            {
+                throw new RuntimeException("Request failed: " + conn.getResponseMessage() + " (" + responseCode + ")");
+            }
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to open connection to <" + urlString + ">.\n" + e.getMessage());
         }
 
         return jsonData;
@@ -236,24 +236,23 @@ public class WebRequest
      * This method sends the request to the web server and returns the replied data if any.
      *
      * @param request specifies the request string.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return replied JSON data, null if request failed.
      */
-    public JsonStructure get(String request)
+    public JsonStructure get(String request, PrintStream statusOut)
     {
-        return get(request, null);
+        return get(request, statusOut, null);
     }   //get
 
     /**
      * This method prints the entire structure of the JSON data recursively.
      *
      * @param data specifies the JSON structure.
+     * @param dataOut specifies the output print stream for the data.
      */
-    public void printData(JsonStructure data)
+    public void printData(JsonStructure data, PrintStream dataOut)
     {
-        if (data != null)
-        {
-            printValue(null, data, 0, null, null);
-        }
+         printValue(null, data, 0, null, null, dataOut);
     }   //printData
 
     /**
@@ -264,13 +263,11 @@ public class WebRequest
      * @param data specifies the JSON structure.
      * @param key1 specifies the first key.
      * @param key2 specifies the second key.
+     * @param dataOut specifies the output print stream for the data.
      */
-    public void printData(JsonStructure data, String key1, String key2)
+    public void printData(JsonStructure data, String key1, String key2, PrintStream dataOut)
     {
-        if (data != null)
-        {
-            printValue(null, data, 0, key1, key2);
-        }
+        printValue(null, data, 0, key1, key2, dataOut);
     }   //printData
 
     /**
@@ -283,8 +280,9 @@ public class WebRequest
      * @param level specifies the indentation level.
      * @param key1 specifies the first key.
      * @param key2 specifies the second key.
+     * @param dataOut specifies the output print stream.
      */
-    private void printValue(String key, JsonValue value, int level, String key1, String key2)
+    private void printValue(String key, JsonValue value, int level, String key1, String key2, PrintStream dataOut)
     {
         JsonValue.ValueType valueType = value.getValueType();
 
@@ -292,60 +290,60 @@ public class WebRequest
         {
             case OBJECT:
                 JsonObject obj = (JsonObject)value;
-                printIndentation(level);
+                printIndentation(level, dataOut);
                 if (key1 != null)
                 {
-                    System.out.print(obj.get(key1));
+                    dataOut.print(obj.get(key1));
                     if (key2 != null)
                     {
-                        System.out.println(": " + obj.get(key2));
+                        dataOut.println(": " + obj.get(key2));
                     }
                     else
                     {
-                        System.out.println();
+                        dataOut.println();
                     }
                 }
                 else
                 {
                     if (key != null)
                     {
-                        System.out.print(key + ": ");
+                        dataOut.print(key + ": ");
                     }
-                    System.out.println("{");
+                    dataOut.println("{");
                     Iterator<String> iterator = obj.keySet().iterator();
                     while (iterator.hasNext())
                     {
                         String childKey = iterator.next();
-                        printValue(childKey, obj.get(childKey), level + 1, key1, key2);
+                        printValue(childKey, obj.get(childKey), level + 1, key1, key2, dataOut);
                     }
-                    printIndentation(level);
-                    System.out.println("}");
+                    printIndentation(level, dataOut);
+                    dataOut.println("}");
                 }
                 break;
 
             case ARRAY:
-                printIndentation(level);
+                printIndentation(level, dataOut);
                 if (key != null)
                 {
-                    System.out.print(key + ": ");
+                    dataOut.print(key + ": ");
                 }
-                System.out.println("[");
+                dataOut.println("[");
                 JsonArray array = (JsonArray)value;
                 for (int i = 0; i < array.size(); i++)
                 {
-                    printValue(null, array.get(i), level + 1, key1, key2);
+                    printValue(null, array.get(i), level + 1, key1, key2, dataOut);
                 }
-                printIndentation(level);
-                System.out.println("]");
+                printIndentation(level, dataOut);
+                dataOut.println("]");
                 break;
 
             default:
-                printIndentation(level);
+                printIndentation(level, dataOut);
                 if (key != null)
                 {
-                    System.out.print(key + ": ");
+                    dataOut.print(key + ": ");
                 }
-                System.out.println(value);
+                dataOut.println(value);
                 break;
         }
     }   //printValue
@@ -354,12 +352,13 @@ public class WebRequest
      * This method indents the line with the specified indentation level.
      *
      * @param level specifies the indentation level.
+     * @param dataOut specifies the output print stream.
      */
-    private void printIndentation(int level)
+    private void printIndentation(int level, PrintStream dataOut)
     {
         for (int i = 0; i < level; i++)
         {
-            System.out.print("    ");
+            dataOut.print("    ");
         }
     }   //printIndentation
 

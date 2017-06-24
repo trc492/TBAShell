@@ -22,7 +22,7 @@
 
 package shell;
 
-import java.util.ArrayList;
+import java.io.PrintStream;
 import java.util.HashMap;
 
 import javax.json.JsonArray;
@@ -33,7 +33,7 @@ import javax.json.JsonValue;
 import webapi.TbaApiV3;
 
 /**
- * This class implements a parser to parse and process TBA commmands.
+ * This class implements a parser to parse and process TBA commands.
  */
 public class TBACommand
 {
@@ -90,6 +90,7 @@ public class TBACommand
     }   //class FilterSet
 
     private TbaApiV3 tbaApi;
+    private String errorMsg = null;
 
     /**
      * Constructor: Create an instance of the object.
@@ -104,13 +105,24 @@ public class TBACommand
     }   //TBACommand
 
     /**
+     * This method returns the error message of the last request if any.
+     *
+     * @return error message of the last request, null if none.
+     */
+    public String getErrorMessage()
+    {
+        return errorMsg;
+    }   //getErrorMessage
+
+    /**
      * This method prints the command help message.
      *
      * @param longVersion specifies true to print the long version of the message, false to print the short version.
+     * @param helpOut specifies standard output stream for the help message.
      */
-    public void printCommandHelp(boolean longVersion)
+    public void printCommandHelp(boolean longVersion, PrintStream helpOut)
     {
-        System.out.print(
+        helpOut.print(
             "<Options>:\n" +
             "\t-(0|1|2)\t\t\t- Specifies output verbose level (0: minimum, 1: medium, 2: maximum - default is 1).\n" +
             "<Model>:\n" +
@@ -130,9 +142,10 @@ public class TBACommand
             "\trobots?team=<TeamKey>\n" +
             "\tmedia?team=<TeamKey>&year=<Year>\n" +
             "\tsocial_media?team=<TeamKey>\n");
+
         if (longVersion)
         {
-            tbaApi.printApiHelp();
+            tbaApi.printApiHelp(helpOut);
         }
     }   //printCommandHelp
 
@@ -148,14 +161,22 @@ public class TBACommand
      *  Value       ::= Specifies the filter value.
      *
      * @param tokens specifies the tokens split from the command line.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    public void processCommand(String[] tokens)
+    public JsonStructure processCommand(String[] tokens, PrintStream dataOut, PrintStream statusOut)
     {
-        String errorMsg = null;
+        JsonStructure data = null;
 
+        errorMsg = null;
         if (tokens[0].equals("get") && tokens.length == 2)
         {
-            tbaApi.printData(tbaApi.get(tokens[1]), null, null);
+            data = tbaApi.get(tokens[1], statusOut);
+            if (data != null && dataOut != null)
+            {
+                tbaApi.printData(data, dataOut);
+            }
         }
         else if (tokens[0].equals("list") && (tokens.length == 2 || tokens.length == 3))
         {
@@ -177,7 +198,7 @@ public class TBACommand
                     }
                     catch (NumberFormatException e)
                     {
-                        errorMsg = "verbose level must be an integer: " + e.getMessage();
+                        errorMsg = "Verbose level must be an integer: " + e.getMessage();
                     }
                 }
                 else
@@ -211,67 +232,67 @@ public class TBACommand
                 {
                     if (params[0].equals("status"))
                     {
-                        errorMsg = processStatusRequest(filterSet);
+                        data = processStatusRequest(filterSet, dataOut, statusOut);
                     }
                     else if (params[0].equals("teams"))
                     {
-                        errorMsg = processTeamsRequest(verboseLevel, filterSet);
+                        data = processTeamsRequest(verboseLevel, filterSet, dataOut, statusOut);
                     }
                     else if (params[0].equals("events"))
                     {
-                        errorMsg = processEventsRequest(verboseLevel, filterSet);
+                        data = processEventsRequest(verboseLevel, filterSet, dataOut, statusOut);
                     }
                     else if (params[0].equals("districts"))
                     {
-                        errorMsg = processDistrictsRequest(verboseLevel, filterSet);
+                        data = processDistrictsRequest(verboseLevel, filterSet, dataOut, statusOut);
                     }
                     else if (params[0].equals("matches"))
                     {
-                        errorMsg = processMatchesRequest(verboseLevel, filterSet);
+                        data = processMatchesRequest(verboseLevel, filterSet, dataOut, statusOut);
                     }
                     else if (params[0].equals("awards"))
                     {
-                        errorMsg = processAwardsRequest(verboseLevel, filterSet);
+                        data = processAwardsRequest(verboseLevel, filterSet, dataOut, statusOut);
                     }
                     else if (params[0].equals("rankings"))
                     {
-                        errorMsg = processRankingsRequest(verboseLevel, filterSet);
+                        data = processRankingsRequest(verboseLevel, filterSet, dataOut, statusOut);
                     }
                     else if (params[0].equals("oprs"))
                     {
-                        errorMsg = processOprsRequest(verboseLevel, filterSet);
+                        data = processOprsRequest(verboseLevel, filterSet, dataOut, statusOut);
                     }
                     else if (params[0].equals("district_points"))
                     {
-                        errorMsg = processDistrictPointsRequest(verboseLevel, filterSet);
+                        data = processDistrictPointsRequest(verboseLevel, filterSet, dataOut, statusOut);
                     }
                     else if (params[0].equals("insights"))
                     {
-                        errorMsg = processInsightsRequest(filterSet);
+                        data = processInsightsRequest(filterSet, dataOut, statusOut);
                     }
                     else if (params[0].equals("predictions"))
                     {
-                        errorMsg = processPredictionsRequest(filterSet);
+                        data = processPredictionsRequest(filterSet, dataOut, statusOut);
                     }
                     else if (params[0].equals("alliances"))
                     {
-                        errorMsg = processAlliancesRequest(filterSet);
+                        data = processAlliancesRequest(filterSet, dataOut, statusOut);
                     }
                     else if (params[0].equals("years_participated"))
                     {
-                        errorMsg = processYearsParticipatedRequest(filterSet);
+                        data = processYearsParticipatedRequest(filterSet, dataOut, statusOut);
                     }
                     else if (params[0].equals("robots"))
                     {
-                        errorMsg = processRobotsRequest(verboseLevel, filterSet);
+                        data = processRobotsRequest(verboseLevel, filterSet, dataOut, statusOut);
                     }
                     else if (params[0].equals("media"))
                     {
-                        errorMsg = processMediaRequest(verboseLevel, filterSet);
+                        data = processMediaRequest(verboseLevel, filterSet, dataOut, statusOut);
                     }
                     else if (params[0].equals("social_media"))
                     {
-                        errorMsg = processSocialMediaRequest(verboseLevel, filterSet);
+                        data = processSocialMediaRequest(verboseLevel, filterSet, dataOut, statusOut);
                     }
                     else
                     {
@@ -291,8 +312,10 @@ public class TBACommand
         if (errorMsg != null)
         {
             if (errorMsg.length() > 0) errorMsg += "\n";
-            System.out.println(errorMsg + "Invalid command syntax, type ? for help.");
+            errorMsg += "Invalid command syntax, type ? for help.";
         }
+
+        return data;
     }   //processCommand
 
     //
@@ -305,45 +328,53 @@ public class TBACommand
      *         status?team=<TeamKey>&event=<EventKey>
      *
      * @param filterSet specifies filter set, null if none.
-     * @return error message string if failed, null if successful.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    private String processStatusRequest(FilterSet filterSet)
+    private JsonStructure processStatusRequest(FilterSet filterSet, PrintStream dataOut, PrintStream statusOut)
     {
-        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
         JsonStructure data = null;
+        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
 
-        if (numFilters == 0)
+        try
         {
-            //
-            // Get TBA status.
-            //
-            data = tbaApi.getStatus();
-        }
-        else if (numFilters == 2)
-        {
-            //
-            // Get team status for the specified event.
-            //
-            String team = filterSet.getValue("team");
-            String event = filterSet.getValue("event");
-
-            if (team != null && event != null)
+            if (numFilters == 0)
             {
-                data = tbaApi.getTeamEventStatus(team, event);
+                //
+                // Get TBA status.
+                //
+                data = tbaApi.getStatus(statusOut);
+            }
+            else if (numFilters == 2)
+            {
+                //
+                // Get team status for the specified event.
+                //
+                String team = filterSet.getValue("team");
+                String event = filterSet.getValue("event");
+
+                if (team != null && event != null)
+                {
+                    data = tbaApi.getTeamEventStatus(team, event, statusOut);
+                }
+            }
+
+            if (data == null)
+            {
+                errorMsg = "Invalid filter, expecting \"team=<TeamKey>&event=<EventKey>\".";
+            }
+            else if (dataOut != null)
+            {
+                tbaApi.printData(data, dataOut);
             }
         }
-
-        String errorMsg = null;
-        if (data != null)
+        catch (RuntimeException e)
         {
-            tbaApi.printData(data, null, null);
-        }
-        else
-        {
-            errorMsg = "Invalid filter, expecting \"team=<TeamKey>&event=<EventKey>\".";
+            errorMsg = e.getMessage();
         }
 
-        return errorMsg;
+        return data;
     }   //processStatusRequest
 
     /**
@@ -356,118 +387,80 @@ public class TBACommand
      *
      * @param verboseLevel specifies the print verbose level.
      * @param filterSet specifies filter set, null if none.
-     * @return error message string if failed, null if successful.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    private String processTeamsRequest(int verboseLevel, FilterSet filterSet)
+    private JsonStructure processTeamsRequest(
+        int verboseLevel, FilterSet filterSet, PrintStream dataOut, PrintStream statusOut)
     {
+        JsonStructure data = null;
         int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
-        boolean syntaxError = false;
+        String verbosity = verboseLevel == 0? "keys": verboseLevel == 1? "simple": null;
 
-        if (numFilters == 0)
+        try
         {
-            //
-            // Get all teams.
-            //
-            ArrayList<JsonValue> teams = tbaApi.getTeams(
-                null, verboseLevel == 0? "keys": verboseLevel == 1? "simple": null);
-            if (teams != null)
-            {
-                printTeamsArray(teams, verboseLevel);
-            }
-            else
-            {
-                syntaxError = true;
-            }
-        }
-        else if (numFilters == 1)
-        {
-            String value;
-
-            if ((value = filterSet.getValue("year")) != null)
+            if (numFilters == 0)
             {
                 //
-                // Get teams for the specified year.
+                // Get all teams.
                 //
-                ArrayList<JsonValue> teams = tbaApi.getTeams(
-                    value, verboseLevel == 0? "keys": verboseLevel == 1? "simple": null);
-                if (teams != null)
+                data = tbaApi.getTeams(null, verbosity, statusOut);
+            }
+            else if (numFilters == 1)
+            {
+                String value;
+
+                if ((value = filterSet.getValue("year")) != null)
                 {
-                    printTeamsArray(teams, verboseLevel);
+                    //
+                    // Get teams for the specified year.
+                    //
+                    data = tbaApi.getTeams(value, verbosity, statusOut);
                 }
                 else
                 {
-                    syntaxError = true;
+                    if ((value = filterSet.getValue("team")) != null)
+                    {
+                        //
+                        // Get info for the specified team.
+                        //
+                        data = tbaApi.getTeam(value, verboseLevel > 1? null: "simple", statusOut);
+                    }
+                    else if ((value = filterSet.getValue("event")) != null)
+                    {
+                        //
+                        // Get teams for the specified event.
+                        //
+                        data = tbaApi.getEventTeams(value, verbosity, statusOut);
+                    }
+                    else if ((value = filterSet.getValue("district")) != null)
+                    {
+                        //
+                        // Get teams for the specified district.
+                        //
+                        data = tbaApi.getDistrictTeams(value, verbosity, statusOut);
+                    }
                 }
             }
-            else
+
+            if (data == null)
             {
-                JsonStructure data = null;
-                String verbosity = verboseLevel == 0? "keys": verboseLevel == 1? "simple": null;
-
-                if ((value = filterSet.getValue("team")) != null)
-                {
-                    //
-                    // Get info for the specified team.
-                    //
-                    data = tbaApi.getTeam(value, verboseLevel > 1? null: "simple");
-                }
-                else if ((value = filterSet.getValue("event")) != null)
-                {
-                    //
-                    // Get teams for the specified event.
-                    //
-                    data = tbaApi.getEventTeams(value, verbosity);
-                }
-                else if ((value = filterSet.getValue("district")) != null)
-                {
-                    //
-                    // Get teams for the specified district.
-                    //
-                    data = tbaApi.getDistrictTeams(value, verbosity);
-                }
-
-                if (data != null)
-                {
-                    tbaApi.printData(data, verboseLevel > 1? null: "key", verboseLevel == 1? "nickname": null);
-                }
-                else
-                {
-                    syntaxError = true;
-                }
+                errorMsg = "Invalid filter, expecting \"year=<Year>\" or \"team=<TeamKey>\" or "
+                    + "\"event=<EventKey>\" or \"district=<DistrictKey>\".";
+            }
+            else if (dataOut != null)
+            {
+                tbaApi.printData(data, verboseLevel > 1? null: "key", verboseLevel == 1? "nickname": null, dataOut);
             }
         }
+        catch (RuntimeException e)
+        {
+            errorMsg = e.getMessage();
+        }
 
-        return syntaxError? "Invalid filter, expecting \"year=<Year>\" or \"team=<TeamKey>\" or " +
-                            "\"event=<EventKey>\" or \"district=<DistrictKey>\".": null;
-
+        return data;
     }   //processTeamsRequest
-
-    /**
-     * This method prints the info of the array list of teams with the specified verbose level.
-     *
-     * @param teams specifies the array list of team objects.
-     * @param verboseLevel specifies the print verbose level.
-     */
-    private void printTeamsArray(ArrayList<JsonValue> teams, int verboseLevel)
-    {
-        for (JsonValue team: teams)
-        {
-            switch (verboseLevel)
-            {
-                case 0:
-                    System.out.println(team);
-                    break;
-
-                case 1:
-                    tbaApi.printData((JsonStructure)team, "key", "nickname");
-                    break;
-
-                case 2:
-                    tbaApi.printData((JsonStructure)team, null, null);
-                    break;
-            }
-        }
-    }   //printTeamsArray
 
     /**
      * This method processes the Events request.
@@ -479,72 +472,81 @@ public class TBACommand
      *
      * @param verboseLevel specifies the print verbose level.
      * @param filterSet specifies filter set, null if none.
-     * @return error message string if failed, null if successful.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    private String processEventsRequest(int verboseLevel, FilterSet filterSet)
+    private JsonStructure processEventsRequest(
+        int verboseLevel, FilterSet filterSet, PrintStream dataOut, PrintStream statusOut)
     {
+        JsonStructure data = null;
         int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
         String verbosity = verboseLevel == 0? "keys": verboseLevel == 1? "simple": null;
-        JsonStructure data = null;
 
-        if (numFilters == 1)
+        try
         {
-            String value;
+            if (numFilters == 1)
+            {
+                String value;
 
-            if ((value = filterSet.getValue("year")) != null)
-            {
-                //
-                // Get events for the specified year.
-                //
-                data = tbaApi.getEvents(value, verbosity);
+                if ((value = filterSet.getValue("year")) != null)
+                {
+                    //
+                    // Get events for the specified year.
+                    //
+                    data = tbaApi.getEvents(value, verbosity, statusOut);
+                }
+                else if ((value = filterSet.getValue("team")) != null)
+                {
+                    //
+                    // Get events for the specified team.
+                    //
+                    data = tbaApi.getTeamEvents(value, null, verbosity, statusOut);
+                }
+                else if ((value = filterSet.getValue("event")) != null)
+                {
+                    //
+                    // Get info for specified event.
+                    //
+                    data = tbaApi.getEvent(value, verboseLevel > 1? null: "simple", statusOut);
+                }
+                else if ((value = filterSet.getValue("district")) != null)
+                {
+                    //
+                    // Get events for the specified district.
+                    //
+                    data = tbaApi.getDistrictEvents(value, verbosity, statusOut);
+                }
             }
-            else if ((value = filterSet.getValue("team")) != null)
+            else if (numFilters == 2)
             {
-                //
-                // Get events for the specified team.
-                //
-                data = tbaApi.getTeamEvents(value, null, verbosity);
+                String value1, value2;
+
+                if ((value1 = filterSet.getValue("team")) != null && (value2 = filterSet.getValue("year")) != null)
+                {
+                    //
+                    // Get events for the specified team and year.
+                    //
+                    data = tbaApi.getTeamEvents(value1, value2, verbosity, statusOut);
+                }
             }
-            else if ((value = filterSet.getValue("event")) != null)
+
+            if (data == null)
             {
-                //
-                // Get info for specified event.
-                //
-                data = tbaApi.getEvent(value, verboseLevel > 1? null: "simple");
+                errorMsg = "Invalid filter, expecting \"year=<Year>\" or \"team=<TeamKey>\" or "
+                    + "\"team=<TeamKey>&year=<Year>\" or " + "\"event=<EventKey>\" or \"district=<DistrictKey>\".";
             }
-            else if ((value = filterSet.getValue("district")) != null)
+            else if (dataOut != null)
             {
-                //
-                // Get events for the specified district.
-                //
-                data = tbaApi.getDistrictEvents(value, verbosity);
+                tbaApi.printData(data, verboseLevel > 1? null: "key", verboseLevel == 1? "name": null, dataOut);
             }
         }
-        else if (numFilters == 2)
+        catch (RuntimeException e)
         {
-            String value1, value2;
-
-            if ((value1 = filterSet.getValue("team")) != null && (value2 = filterSet.getValue("year")) != null)
-            {
-                //
-                // Get events for the specified team and year.
-                //
-                data = tbaApi.getTeamEvents(value1, value2, verbosity);
-            }
+            errorMsg = e.getMessage();
         }
 
-        String errorMsg = null;
-        if (data != null)
-        {
-            tbaApi.printData(data, verboseLevel > 1? null: "key", verboseLevel == 1? "name": null);
-        }
-        else
-        {
-            errorMsg = "Invalid filter, expecting \"year=<Year>\" or \"team=<TeamKey>\" or " +
-                "\"team=<TeamKey>&year=<Year>\" or " + "\"event=<EventKey>\" or \"district=<DistrictKey>\".";
-        }
-
-        return errorMsg;
+        return data;
     }   //processEventsRequest
 
     /**
@@ -554,44 +556,53 @@ public class TBACommand
      *
      * @param verboseLevel specifies the print verbose level.
      * @param filterSet specifies filter set, null if none.
-     * @return error message string if failed, null if successful.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    private String processDistrictsRequest(int verboseLevel, FilterSet filterSet)
+    private JsonStructure processDistrictsRequest(
+        int verboseLevel, FilterSet filterSet, PrintStream dataOut, PrintStream statusOut)
     {
-        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
         JsonStructure data = null;
+        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
 
-        if (numFilters == 1)
+        try
         {
-            String value;
-
-            if ((value = filterSet.getValue("year")) != null)
+            if (numFilters == 1)
             {
-                //
-                // Get districts for the specified year.
-                //
-                data = tbaApi.getDistricts(value);
+                String value;
+
+                if ((value = filterSet.getValue("year")) != null)
+                {
+                    //
+                    // Get districts for the specified year.
+                    //
+                    data = tbaApi.getDistricts(value, statusOut);
+                }
+                else if ((value = filterSet.getValue("team")) != null)
+                {
+                    //
+                    // Get districts for the specified team.
+                    //
+                    data = tbaApi.getTeamDistricts(value, statusOut);
+                }
             }
-            else if ((value = filterSet.getValue("team")) != null)
+
+            if (data == null)
             {
-                //
-                // Get districts for the specified team.
-                //
-                data = tbaApi.getTeamDistricts(value);
+                errorMsg = "Invalid filter, expecting \"year=<Year>\" or \"team=<TeamKey>\".";
+            }
+            else if (dataOut != null)
+            {
+                tbaApi.printData(data, verboseLevel > 1? null: "key", verboseLevel == 1? "display_name": null, dataOut);
             }
         }
-
-        String errorMsg = null;
-        if (data != null)
+        catch (RuntimeException e)
         {
-            tbaApi.printData(data, verboseLevel > 1? null: "key", verboseLevel == 1? "display_name": null);
-        }
-        else
-        {
-            errorMsg = "Invalid filter, expecting \"year=<Year>\" or \"team=<TeamKey>\".";
+            errorMsg = e.getMessage();
         }
 
-        return errorMsg;
+        return data;
     }   //processDistrictsRequest
 
     /**
@@ -603,65 +614,74 @@ public class TBACommand
      *
      * @param verboseLevel specifies the print verbose level.
      * @param filterSet specifies filter set, null if none.
-     * @return error message string if failed, null if successful.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    private String processMatchesRequest(int verboseLevel, FilterSet filterSet)
+    private JsonStructure processMatchesRequest(
+        int verboseLevel, FilterSet filterSet, PrintStream dataOut, PrintStream statusOut)
     {
+        JsonStructure data = null;
         int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
         String verbosity = verboseLevel > 0? null: "keys";
-        JsonStructure data = null;
 
-        if (numFilters == 1)
+        try
         {
-            String value;
+            if (numFilters == 1)
+            {
+                String value;
 
-            if ((value = filterSet.getValue("event")) != null)
-            {
-                //
-                // Get matches for the specified event.
-                //
-                data = tbaApi.getEventMatches(value, verbosity);
+                if ((value = filterSet.getValue("event")) != null)
+                {
+                    //
+                    // Get matches for the specified event.
+                    //
+                    data = tbaApi.getEventMatches(value, verbosity, statusOut);
+                }
+                else if ((value = filterSet.getValue("match")) != null)
+                {
+                    //
+                    // Get info for the specified match.
+                    //
+                    data = tbaApi.getMatch(value, verboseLevel > 1? null: "simple", statusOut);
+                }
             }
-            else if ((value = filterSet.getValue("match")) != null)
+            else if (numFilters == 2)
             {
-                //
-                // Get info for the specified match.
-                //
-                data = tbaApi.getMatch(value, verboseLevel > 1? null: "simple");
+                String value1, value2;
+
+                if ((value1 = filterSet.getValue("team")) != null && (value2 = filterSet.getValue("year")) != null)
+                {
+                    //
+                    // Get matches for the specified team and year.
+                    //
+                    data = tbaApi.getTeamMatches(value1, value2, verbosity, statusOut);
+                }
+                else if ((value1 = filterSet.getValue("team")) != null && (value2 = filterSet.getValue("event")) != null)
+                {
+                    //
+                    // Get matches for the specified event and team.
+                    //
+                    data = tbaApi.getTeamEventMatches(value1, value2, verbosity, statusOut);
+                }
+            }
+
+            if (data == null)
+            {
+                errorMsg = "Invalid filter, expecting \"team=<TeamKey>&year=<Year>\" or \"event=<EventKey>\" or "
+                    + "\"event=<EventKey>&team=<TeamKey>\" or \"match=<MatchKey>\".";
+            }
+            else if (dataOut != null)
+            {
+                tbaApi.printData(data, verboseLevel > 0? null: "key", null, dataOut);
             }
         }
-        else if (numFilters == 2)
+        catch (RuntimeException e)
         {
-            String value1, value2;
-
-            if ((value1 = filterSet.getValue("team")) != null && (value2 = filterSet.getValue("year")) != null)
-            {
-                //
-                // Get matches for the specified team and year.
-                //
-                data = tbaApi.getTeamMatches(value1, value2, verbosity);
-            }
-            else if ((value1 = filterSet.getValue("team")) != null && (value2 = filterSet.getValue("event")) != null)
-            {
-                //
-                // Get matches for the specified event and team.
-                //
-                data = tbaApi.getTeamEventMatches(value1, value2, verbosity);
-            }
+            errorMsg = e.getMessage();
         }
 
-        String errorMsg = null;
-        if (data != null)
-        {
-            tbaApi.printData(data, verboseLevel > 0? null: "key", null);
-        }
-        else
-        {
-            errorMsg = "Invalid filter, expecting \"team=<TeamKey>&year=<Year>\" or \"event=<EventKey>\" or " +
-                "\"event=<EventKey>&team=<TeamKey>\" or \"match=<MatchKey>\".";
-        }
-
-        return errorMsg;
+        return data;
     }   //processMatchesRequest
 
     /**
@@ -673,64 +693,73 @@ public class TBACommand
      *
      * @param verboseLevel specifies the print verbose level.
      * @param filterSet specifies filter set, null if none.
-     * @return error message string if failed, null if successful.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    private String processAwardsRequest(int verboseLevel, FilterSet filterSet)
+    private JsonStructure processAwardsRequest(
+        int verboseLevel, FilterSet filterSet, PrintStream dataOut, PrintStream statusOut)
     {
-        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
         JsonStructure data = null;
+        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
 
-        if (numFilters == 1)
+        try
         {
-            String value;
+            if (numFilters == 1)
+            {
+                String value;
 
-            if ((value = filterSet.getValue("team")) != null)
-            {
-                //
-                // Get awards for the specified team.
-                //
-                data = tbaApi.getTeamAwards(value, null);
+                if ((value = filterSet.getValue("team")) != null)
+                {
+                    //
+                    // Get awards for the specified team.
+                    //
+                    data = tbaApi.getTeamAwards(value, null, statusOut);
+                }
+                else if ((value = filterSet.getValue("event")) != null)
+                {
+                    //
+                    // Get awards for the specified event.
+                    //
+                    data = tbaApi.getEventAwards(value, statusOut);
+                }
             }
-            else if ((value = filterSet.getValue("event")) != null)
+            else if (numFilters == 2)
             {
-                //
-                // Get awards for the specified event.
-                //
-                data = tbaApi.getEventAwards(value);
+                String value1, value2;
+
+                if ((value1 = filterSet.getValue("team")) != null && (value2 = filterSet.getValue("year")) != null)
+                {
+                    //
+                    // Get awards for the specified team and year.
+                    //
+                    data = tbaApi.getTeamAwards(value1, value2, statusOut);
+                }
+                else if ((value1 = filterSet.getValue("team")) != null && (value2 = filterSet.getValue("event")) != null)
+                {
+                    //
+                    // Get awards for the specified event and team.
+                    //
+                    data = tbaApi.getTeamEventAwards(value1, value2, statusOut);
+                }
+            }
+
+            if (data == null)
+            {
+                errorMsg = "Invalid filter, expecting \"team=<TeamKey>\" or \"team=<TeamKey>&year=<Year>\" or "
+                    + "\"event=<EventKey>\" or \"event=<EventKey>&team=<TeamKey>\".";
+            }
+            else if (dataOut != null)
+            {
+                tbaApi.printData(data, verboseLevel > 1? null: "name", verboseLevel == 1? "event_key": null, dataOut);
             }
         }
-        else if (numFilters == 2)
+        catch (RuntimeException e)
         {
-            String value1, value2;
-
-            if ((value1 = filterSet.getValue("team")) != null && (value2 = filterSet.getValue("year")) != null)
-            {
-                //
-                // Get awards for the specified team and year.
-                //
-                data = tbaApi.getTeamAwards(value1, value2);
-            }
-            else if ((value1 = filterSet.getValue("team")) != null && (value2 = filterSet.getValue("event")) != null)
-            {
-                //
-                // Get awards for the specified event and team.
-                //
-                data = tbaApi.getTeamEventAwards(value1, value2);
-            }
+            errorMsg = e.getMessage();
         }
 
-        String errorMsg = null;
-        if (data != null)
-        {
-            tbaApi.printData(data, verboseLevel > 1? null: "name", verboseLevel == 1? "event_key": null);
-        }
-        else
-        {
-            errorMsg = "Invalid filter, expecting \"team=<TeamKey>\" or \"team=<TeamKey>&year=<Year>\" or " +
-                "\"event=<EventKey>\" or \"event=<EventKey>&team=<TeamKey>\".";
-        }
-
-        return errorMsg;
+        return data;
     }   //processAwardsRequest
 
     /**
@@ -740,44 +769,53 @@ public class TBACommand
      *
      * @param verboseLevel specifies the print verbose level.
      * @param filterSet specifies filter set, null if none.
-     * @return error message string if failed, null if successful.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    private String processRankingsRequest(int verboseLevel, FilterSet filterSet)
+    private JsonStructure processRankingsRequest(
+        int verboseLevel, FilterSet filterSet, PrintStream dataOut, PrintStream statusOut)
     {
-        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
         JsonStructure data = null;
+        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
 
-        if (numFilters == 1)
+        try
         {
-            String value;
-
-            if ((value = filterSet.getValue("event")) != null)
+            if (numFilters == 1)
             {
-                //
-                // Get rankings for the specified event.
-                //
-                data = tbaApi.getEventRankings(value, verboseLevel);
+                String value;
+
+                if ((value = filterSet.getValue("event")) != null)
+                {
+                    //
+                    // Get rankings for the specified event.
+                    //
+                    data = tbaApi.getEventRankings(value, verboseLevel, statusOut);
+                }
+                else if ((value = filterSet.getValue("district")) != null)
+                {
+                    //
+                    // Get rankings for the specified district.
+                    //
+                    data = tbaApi.getDistrictRankings(value, statusOut);
+                }
             }
-            else if ((value = filterSet.getValue("district")) != null)
+
+            if (data == null)
             {
-                //
-                // Get rankings for the specified district.
-                //
-                data = tbaApi.getDistrictRankings(value);
+                errorMsg = "Invalid filter, expecting \"event=<EventKey>\" or \"district=<DistrictKey>\".";
+            }
+            else if (dataOut != null)
+            {
+                tbaApi.printData(data, verboseLevel > 1? null: "rank", verboseLevel == 1? "team_key": null, dataOut);
             }
         }
-
-        String errorMsg = null;
-        if (data != null)
+        catch (RuntimeException e)
         {
-            tbaApi.printData(data, verboseLevel > 1? null: "rank", verboseLevel == 1? "team_key": null);
-        }
-        else
-        {
-            errorMsg = "Invalid filter, expecting \"event=<EventKey>\" or \"district=<DistrictKey>\".";
+            errorMsg = e.getMessage();
         }
 
-        return errorMsg;
+        return data;
     }   //processRankingsRequest
 
     /**
@@ -786,37 +824,46 @@ public class TBACommand
      *
      * @param verboseLevel specifies the print verbose level.
      * @param filterSet specifies filter set, null if none.
-     * @return error message string if failed, null if successful.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    private String processOprsRequest(int verboseLevel, FilterSet filterSet)
+    private JsonStructure processOprsRequest(
+        int verboseLevel, FilterSet filterSet, PrintStream dataOut, PrintStream statusOut)
     {
-        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
         JsonStructure data = null;
+        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
 
-        if (numFilters == 1)
+        try
         {
-            String value;
-
-            if ((value = filterSet.getValue("event")) != null)
+            if (numFilters == 1)
             {
-                //
-                // Get oprs for the specified event.
-                //
-                data = tbaApi.getEventOprs(value, verboseLevel);
+                String value;
+
+                if ((value = filterSet.getValue("event")) != null)
+                {
+                    //
+                    // Get oprs for the specified event.
+                    //
+                    data = tbaApi.getEventOprs(value, verboseLevel, statusOut);
+                }
+            }
+
+            if (data == null)
+            {
+                errorMsg = "Invalid filter, expecting \"event=<EventKey>\".";
+            }
+            else if (dataOut != null)
+            {
+                tbaApi.printData(data, dataOut);
             }
         }
-
-        String errorMsg = null;
-        if (data != null)
+        catch (RuntimeException e)
         {
-            tbaApi.printData(data);
-        }
-        else
-        {
-            errorMsg = "Invalid filter, expecting \"event=<EventKey>\".";
+            errorMsg = e.getMessage();
         }
 
-        return errorMsg;
+        return data;
     }   //processOprsRequest
 
     /**
@@ -825,37 +872,46 @@ public class TBACommand
      *
      * @param verboseLevel specifies the print verbose level.
      * @param filterSet specifies filter set, null if none.
-     * @return error message string if failed, null if successful.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    private String processDistrictPointsRequest(int verboseLevel, FilterSet filterSet)
+    private JsonStructure processDistrictPointsRequest(
+        int verboseLevel, FilterSet filterSet, PrintStream dataOut, PrintStream statusOut)
     {
-        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
         JsonStructure data = null;
+        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
 
-        if (numFilters == 1)
+        try
         {
-            String value;
-
-            if ((value = filterSet.getValue("event")) != null)
+            if (numFilters == 1)
             {
-                //
-                // Get district points for the specified event.
-                //
-                data = tbaApi.getEventDistrictPoints(value, verboseLevel);
+                String value;
+
+                if ((value = filterSet.getValue("event")) != null)
+                {
+                    //
+                    // Get district points for the specified event.
+                    //
+                    data = tbaApi.getEventDistrictPoints(value, verboseLevel, statusOut);
+                }
+            }
+
+            if (data == null)
+            {
+                errorMsg = "Invalid filter, expecting \"event=<EventKey>\".";
+            }
+            else if (dataOut != null)
+            {
+                tbaApi.printData(data, dataOut);
             }
         }
-
-        String errorMsg = null;
-        if (data != null)
+        catch (RuntimeException e)
         {
-            tbaApi.printData(data);
-        }
-        else
-        {
-            errorMsg = "Invalid filter, expecting \"event=<EventKey>\".";
+            errorMsg = e.getMessage();
         }
 
-        return errorMsg;
+        return data;
     }   //processDistrictPointsRequest
 
     /**
@@ -863,37 +919,45 @@ public class TBACommand
      * Syntax: insights?event=<EventKey>
      *
      * @param filterSet specifies filter set, null if none.
-     * @return error message string if failed, null if successful.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    private String processInsightsRequest(FilterSet filterSet)
+    private JsonStructure processInsightsRequest(FilterSet filterSet, PrintStream dataOut, PrintStream statusOut)
     {
-        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
         JsonStructure data = null;
+        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
 
-        if (numFilters == 1)
+        try
         {
-            String value;
-
-            if ((value = filterSet.getValue("event")) != null)
+            if (numFilters == 1)
             {
-                //
-                // Get insights for the specified event.
-                //
-                data = tbaApi.getEventInsights(value);
+                String value;
+
+                if ((value = filterSet.getValue("event")) != null)
+                {
+                    //
+                    // Get insights for the specified event.
+                    //
+                    data = tbaApi.getEventInsights(value, statusOut);
+                }
+            }
+
+            if (data == null)
+            {
+                errorMsg = "Invalid filter, expecting \"event=<EventKey>\".";
+            }
+            else if (dataOut != null)
+            {
+                tbaApi.printData(data, dataOut);
             }
         }
-
-        String errorMsg = null;
-        if (data != null)
+        catch (RuntimeException e)
         {
-            tbaApi.printData(data);
-        }
-        else
-        {
-            errorMsg = "Invalid filter, expecting \"event=<EventKey>\".";
+            errorMsg = e.getMessage();
         }
 
-        return errorMsg;
+        return data;
     }   //processInsightsRequest
 
     /**
@@ -901,37 +965,45 @@ public class TBACommand
      * Syntax: predictions?event=<EventKey>
      *
      * @param filterSet specifies filter set, null if none.
-     * @return error message string if failed, null if successful.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    private String processPredictionsRequest(FilterSet filterSet)
+    private JsonStructure processPredictionsRequest(FilterSet filterSet, PrintStream dataOut, PrintStream statusOut)
     {
-        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
         JsonStructure data = null;
+        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
 
-        if (numFilters == 1)
+        try
         {
-            String value;
-
-            if ((value = filterSet.getValue("event")) != null)
+            if (numFilters == 1)
             {
-                //
-                // Get predictions for the specified event.
-                //
-                data = tbaApi.getEventPredictions(value);
+                String value;
+
+                if ((value = filterSet.getValue("event")) != null)
+                {
+                    //
+                    // Get predictions for the specified event.
+                    //
+                    data = tbaApi.getEventPredictions(value, statusOut);
+                }
+            }
+
+            if (data == null)
+            {
+                errorMsg = "Invalid filter, expecting \"event=<EventKey>\".";
+            }
+            else if (dataOut != null)
+            {
+                tbaApi.printData(data, dataOut);
             }
         }
-
-        String errorMsg = null;
-        if (data != null)
+        catch (RuntimeException e)
         {
-            tbaApi.printData(data);
-        }
-        else
-        {
-            errorMsg = "Invalid filter, expecting \"event=<EventKey>\".";
+            errorMsg = e.getMessage();
         }
 
-        return errorMsg;
+        return data;
     }   //processPredictionsRequest
 
     /**
@@ -939,37 +1011,45 @@ public class TBACommand
      * Syntax: alliances?event=<EventKey>
      *
      * @param filterSet specifies filter set, null if none.
-     * @return error message string if failed, null if successful.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    private String processAlliancesRequest(FilterSet filterSet)
+    private JsonStructure processAlliancesRequest(FilterSet filterSet, PrintStream dataOut, PrintStream statusOut)
     {
-        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
         JsonStructure data = null;
+        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
 
-        if (numFilters == 1)
+        try
         {
-            String value;
-
-            if ((value = filterSet.getValue("event")) != null)
+            if (numFilters == 1)
             {
-                //
-                // Get alliances for the specified event.
-                //
-                data = tbaApi.getEventAlliances(value);
+                String value;
+
+                if ((value = filterSet.getValue("event")) != null)
+                {
+                    //
+                    // Get alliances for the specified event.
+                    //
+                    data = tbaApi.getEventAlliances(value, statusOut);
+                }
+            }
+
+            if (data == null)
+            {
+                errorMsg = "Invalid filter, expecting \"event=<EventKey>\".";
+            }
+            else if (dataOut != null)
+            {
+                tbaApi.printData(data, dataOut);
             }
         }
-
-        String errorMsg = null;
-        if (data != null)
+        catch (RuntimeException e)
         {
-            tbaApi.printData(data);
-        }
-        else
-        {
-            errorMsg = "Invalid filter, expecting \"event=<EventKey>\".";
+            errorMsg = e.getMessage();
         }
 
-        return errorMsg;
+        return data;
     }   //processAlliancesRequest
 
     /**
@@ -977,37 +1057,46 @@ public class TBACommand
      * Syntax: years_participated?team=<TeamKey>
      *
      * @param filterSet specifies filter set, null if none.
-     * @return error message string if failed, null if successful.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    private String processYearsParticipatedRequest(FilterSet filterSet)
+    private JsonStructure processYearsParticipatedRequest(
+        FilterSet filterSet, PrintStream dataOut, PrintStream statusOut)
     {
-        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
         JsonStructure data = null;
+        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
 
-        if (numFilters == 1)
+        try
         {
-            String value;
-
-            if ((value = filterSet.getValue("team")) != null)
+            if (numFilters == 1)
             {
-                //
-                // Get years participated for the specified team.
-                //
-                data = tbaApi.getTeamYearsParticipated(value);
+                String value;
+
+                if ((value = filterSet.getValue("team")) != null)
+                {
+                    //
+                    // Get years participated for the specified team.
+                    //
+                    data = tbaApi.getTeamYearsParticipated(value, statusOut);
+                }
+            }
+
+            if (data == null)
+            {
+                errorMsg = "Invalid filter, expecting \"team=<TeamKey>\".";
+            }
+            else if (dataOut != null)
+            {
+                tbaApi.printData(data, dataOut);
             }
         }
-
-        String errorMsg = null;
-        if (data != null)
+        catch (RuntimeException e)
         {
-            tbaApi.printData(data);
-        }
-        else
-        {
-            errorMsg = "Invalid filter, expecting \"team=<TeamKey>\".";
+            errorMsg = e.getMessage();
         }
 
-        return errorMsg;
+        return data;
     }   //processYearsParticipatedRequest
 
     /**
@@ -1016,44 +1105,56 @@ public class TBACommand
      *
      * @param verboseLevel specifies the print verbose level.
      * @param filterSet specifies filter set, null if none.
-     * @return error message string if failed, null if successful.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    private String processRobotsRequest(int verboseLevel, FilterSet filterSet)
+    private JsonStructure processRobotsRequest(
+        int verboseLevel, FilterSet filterSet, PrintStream dataOut, PrintStream statusOut)
     {
-        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
         JsonArray data = null;
+        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
 
-        if (numFilters == 1)
+        try
         {
-            String value;
-
-            if ((value = filterSet.getValue("team")) != null)
+            if (numFilters == 1)
             {
-                //
-                // Get robots for the specified team.
-                //
-                data = (JsonArray)tbaApi.getTeamRobots(value);
-                if (data != null)
+                String value;
+
+                if ((value = filterSet.getValue("team")) != null)
                 {
-                    for (JsonValue robot: data)
+                    //
+                    // Get robots for the specified team.
+                    //
+                    data = (JsonArray)tbaApi.getTeamRobots(value, statusOut);
+                    if (data != null && dataOut != null)
                     {
-                        switch (verboseLevel)
+                        for (JsonValue robot: data)
                         {
-                            case 0:
-                            case 1:
-                                tbaApi.printData((JsonStructure)robot, "key", "robot_name");
-                                break;
-    
-                            case 2:
-                                tbaApi.printData((JsonStructure)robot);
-                                break;
+                            switch (verboseLevel)
+                            {
+                                case 0:
+                                case 1:
+                                    tbaApi.printData((JsonStructure)robot, "key", "robot_name", dataOut);
+                                    break;
+
+                                case 2:
+                                    tbaApi.printData((JsonStructure)robot, dataOut);
+                                    break;
+                            }
                         }
                     }
                 }
             }
+
+            errorMsg = data == null? "Invalid filter, expecting \"team=<TeamKey>\".": null;
+        }
+        catch (RuntimeException e)
+        {
+            errorMsg = e.getMessage();
         }
 
-        return data == null? "Invalid filter, expecting \"team=<TeamKey>\".": null;
+        return data;
     }   //processRobotsRequest
 
     /**
@@ -1062,46 +1163,61 @@ public class TBACommand
      *
      * @param verboseLevel specifies the print verbose level.
      * @param filterSet specifies filter set, null if none.
-     * @return error message string if failed, null if successful.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    private String processMediaRequest(int verboseLevel, FilterSet filterSet)
+    private JsonStructure processMediaRequest(
+        int verboseLevel, FilterSet filterSet, PrintStream dataOut, PrintStream statusOut)
     {
-        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
         JsonArray data = null;
+        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
 
-        if (numFilters == 2)
+        try
         {
-            String value1, value2;
-
-            if ((value1 = filterSet.getValue("team")) != null && (value2 = filterSet.getValue("year")) != null)
+            if (numFilters == 2)
             {
-                //
-                // Get media for the specified team.
-                //
-                data = (JsonArray)tbaApi.getTeamMedia(value1, value2);
-                for (JsonValue media: data)
-                {
-                    switch (verboseLevel)
-                    {
-                        case 0:
-                        case 1:
-                            JsonObject obj = (JsonObject)media;
-                            String site = obj.getString("type");
-                            System.out.println(
-                                "http://" + site + ".com/" +
-                                (site.equalsIgnoreCase("youtube")? "watch?v=": "") +
-                                obj.getString("foreign_key"));
-                            break;
+                String value1, value2;
 
-                        case 2:
-                            tbaApi.printData((JsonStructure)media, null, null);
-                            break;
+                if ((value1 = filterSet.getValue("team")) != null && (value2 = filterSet.getValue("year")) != null)
+                {
+                    //
+                    // Get media for the specified team.
+                    //
+                    data = (JsonArray)tbaApi.getTeamMedia(value1, value2, statusOut);
+                    if (data != null && dataOut != null)
+                    {
+                        for (JsonValue media: data)
+                        {
+                            switch (verboseLevel)
+                            {
+                                case 0:
+                                case 1:
+                                    JsonObject obj = (JsonObject)media;
+                                    String site = obj.getString("type");
+                                    dataOut.println(
+                                        "http://" + site + ".com/" +
+                                        (site.equalsIgnoreCase("youtube")? "watch?v=": "") +
+                                        obj.getString("foreign_key"));
+                                    break;
+
+                                case 2:
+                                    tbaApi.printData((JsonStructure)media, dataOut);
+                                    break;
+                            }
+                        }
                     }
                 }
             }
+
+            errorMsg = data == null? "Invalid filter, expecting \"team=<TeamKey>&year=<Year>\".": null;
+        }
+        catch (RuntimeException e)
+        {
+            errorMsg = e.getMessage();
         }
 
-        return data == null? "Invalid filter, expecting \"team=<TeamKey>&year=<Year>\".": null;
+        return data;
     }   //processMediaRequest
 
     /**
@@ -1110,49 +1226,61 @@ public class TBACommand
      *
      * @param verboseLevel specifies the print verbose level.
      * @param filterSet specifies filter set, null if none.
-     * @return error message string if failed, null if successful.
+     * @param dataOut specifies the output stream to print the data, null if no data output required.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return resulting data of the command, null if command failed.
      */
-    private String processSocialMediaRequest(int verboseLevel, FilterSet filterSet)
+    private JsonStructure processSocialMediaRequest(
+        int verboseLevel, FilterSet filterSet, PrintStream dataOut, PrintStream statusOut)
     {
-        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
         JsonArray data = null;
+        int numFilters = filterSet != null? filterSet.getNumFilters(): 0;
 
-        if (numFilters == 1)
+        try
         {
-            String value;
-
-            if ((value = filterSet.getValue("team")) != null)
+            if (numFilters == 1)
             {
-                //
-                // Get social media for the specified team.
-                //
-                data = (JsonArray)tbaApi.getTeamSocialMedia(value);
-                if (data != null)
+                String value;
+
+                if ((value = filterSet.getValue("team")) != null)
                 {
-                    for (JsonValue socialMedia: data)
+                    //
+                    // Get social media for the specified team.
+                    //
+                    data = (JsonArray)tbaApi.getTeamSocialMedia(value, statusOut);
+                    if (data != null && dataOut != null)
                     {
-                        switch (verboseLevel)
+                        for (JsonValue socialMedia: data)
                         {
-                            case 0:
-                            case 1:
-                                JsonObject obj = (JsonObject)socialMedia;
-                                String type = obj.getString("type");
-                                int index = type.indexOf('-');
-                                System.out.println(
-                                    "http://" + (index == -1? type: type.substring(0, index)) + ".com/" +
-                                    obj.getString("foreign_key"));
-                                break;
-    
-                            case 2:
-                                tbaApi.printData((JsonStructure)socialMedia, null, null);
-                                break;
+                            switch (verboseLevel)
+                            {
+                                case 0:
+                                case 1:
+                                    JsonObject obj = (JsonObject)socialMedia;
+                                    String type = obj.getString("type");
+                                    int index = type.indexOf('-');
+                                    dataOut.println(
+                                        "http://" + (index == -1? type: type.substring(0, index)) + ".com/" +
+                                        obj.getString("foreign_key"));
+                                    break;
+
+                                case 2:
+                                    tbaApi.printData((JsonStructure)socialMedia, dataOut);
+                                    break;
+                            }
                         }
                     }
                 }
             }
+
+            errorMsg = data == null? "Invalid filter, expecting \"team=<TeamKey>\".": null;
+        }
+        catch (RuntimeException e)
+        {
+            errorMsg = e.getMessage();
         }
 
-        return data == null? "Invalid filter, expecting \"team=<TeamKey>\".": null;
+        return data;
     }   //processSocialMediaRequest
 
 }   //class TBACommand

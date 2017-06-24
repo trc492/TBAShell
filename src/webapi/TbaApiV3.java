@@ -22,9 +22,11 @@
 
 package webapi;
 
-import java.util.ArrayList;
+import java.io.PrintStream;
 
+import javax.json.Json;
 import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
@@ -55,10 +57,11 @@ public class TbaApiV3 extends WebRequest
 
     /**
      * This method prints the syntax of the API requests.
+     * @param helpOut specifies standard output stream for the help message.
      */
-    public void printApiHelp()
+    public void printApiHelp(PrintStream helpOut)
     {
-        System.out.print(
+        helpOut.print(
             "<Request>: (version 3)\n" +
             "\tstatus\t\t\t\t\t\t\t- TBA Status request.\n" +
             "\tteams[/<Year>]/<PageNum>[/(simple|keys)]\t\t- Team List Request with optional year and verbosity.\n" +
@@ -99,44 +102,48 @@ public class TbaApiV3 extends WebRequest
     /**
      * This method sends a Status Request.
      *
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return status data.
      */
-    public JsonStructure getStatus()
+    public JsonStructure getStatus(PrintStream statusOut)
     {
-        return get("status", header);
+        return get("status", statusOut, header);
     }   //getStatus
 
     /**
      * This method adds teams of the specified page to the teams array.
      *
-     * @param teams specifies the array list to add the teams into.
+     * @param arrBuilder specifies the array builder to add the teams into.
      * @param year specifies the optional year, null for all years.
      * @param pageNum specifies the page number.
      * @param verbosity specifies optional verbosity, null for full verbosity.
-     * @return array of teams.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
+     * @return true if successful, false if failed.
      */
-    private ArrayList<JsonValue> addTeams(ArrayList<JsonValue> teams, String year, int pageNum, String verbosity)
+    private boolean addTeams(
+        JsonArrayBuilder arrBuilder, String year, int pageNum, String verbosity, PrintStream statusOut)
     {
         String request = "teams/";
         if (year != null) request += year + "/";
         request += pageNum;
         if (verbosity != null) request += "/" + verbosity;
 
-        JsonStructure data = get(request, header);
-
+        JsonStructure data = get(request, statusOut, header);
+        boolean success;
         if (data != null && data.getValueType() == JsonValue.ValueType.ARRAY && !((JsonArray)data).isEmpty())
         {
             for (JsonValue team: (JsonArray)data)
             {
-                teams.add(team);
+                arrBuilder.add(team);
             }
+            success = true;
         }
         else
         {
-            teams = null;
+            success = false;
         }
 
-        return teams;
+        return success;
     }   //addTeams
 
     /**
@@ -144,19 +151,20 @@ public class TbaApiV3 extends WebRequest
      *
      * @param year specifies the optional year, null for all years.
      * @param verbosity specifies optional verbosity, null for full verbosity.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return team list data.
      */
-    public ArrayList<JsonValue> getTeams(String year, String verbosity)
+    public JsonStructure getTeams(String year, String verbosity, PrintStream statusOut)
     {
-        ArrayList<JsonValue> teams = new ArrayList<>();
+        JsonArrayBuilder arrBuilder = Json.createArrayBuilder();
 
         for (int page = 0; ; page++)
         {
-            if (addTeams(teams, year, page, verbosity) == null)
+            if (!addTeams(arrBuilder, year, page, verbosity, statusOut))
                 break;
         }
 
-        return teams;
+        return arrBuilder.build();
     }   //getTeams
 
     /**
@@ -164,46 +172,50 @@ public class TbaApiV3 extends WebRequest
      *
      * @param teamKey specifies the team key.
      * @param verbosity specifies optional verbosity, null for full verbosity.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return single team data.
      */
-    public JsonStructure getTeam(String teamKey, String verbosity)
+    public JsonStructure getTeam(String teamKey, String verbosity, PrintStream statusOut)
     {
         String request = "team/" + teamKey;
         if (verbosity != null) request += "/" + verbosity;
-        return get(request, header);
+        return get(request, statusOut, header);
     }   //getTeam
 
     /**
      * This method sends the Team Years Participated Request.
      *
      * @param teamKey specifies the team key.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return team years participated data.
      */
-    public JsonStructure getTeamYearsParticipated(String teamKey)
+    public JsonStructure getTeamYearsParticipated(String teamKey, PrintStream statusOut)
     {
-        return get("team/" + teamKey + "/years_participated", header);
+        return get("team/" + teamKey + "/years_participated", statusOut, header);
     }   //getTeamYearsParticipated
 
     /**
      * This method sends the Team Districts Request.
      *
      * @param teamKey specifies the team key.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return team districts data.
      */
-    public JsonStructure getTeamDistricts(String teamKey)
+    public JsonStructure getTeamDistricts(String teamKey, PrintStream statusOut)
     {
-        return get("team/" + teamKey + "/districts", header);
+        return get("team/" + teamKey + "/districts", statusOut, header);
     }   //getTeamDistricts
 
     /**
      * This method sends the Team Robots Request.
      *
      * @param teamKey specifies the team key.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return team robots data.
      */
-    public JsonStructure getTeamRobots(String teamKey)
+    public JsonStructure getTeamRobots(String teamKey, PrintStream statusOut)
     {
-        return get("team/" + teamKey + "/robots", header);
+        return get("team/" + teamKey + "/robots", statusOut, header);
     }   //getTeamRobots
 
     /**
@@ -212,14 +224,15 @@ public class TbaApiV3 extends WebRequest
      * @param teamKey specifies the team key.
      * @param year specifies the optional year, null for all years.
      * @param verbosity specifies optional verbosity, null for full verbosity.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return team events data.
      */
-    public JsonStructure getTeamEvents(String teamKey, String year, String verbosity)
+    public JsonStructure getTeamEvents(String teamKey, String year, String verbosity, PrintStream statusOut)
     {
         String request = "team/" + teamKey + "/events";
         if (year != null) request += "/" + year;
         if (verbosity != null) request += "/" + verbosity;
-        return get(request, header);
+        return get(request, statusOut, header);
     }   //getTeamEvents
 
     /**
@@ -228,13 +241,14 @@ public class TbaApiV3 extends WebRequest
      * @param teamKey specifies the team key.
      * @param eventKey specifies the event key.
      * @param verbosity specifies optional verbosity, null for full verbosity.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return team event matches data.
      */
-    public JsonStructure getTeamEventMatches(String teamKey, String eventKey, String verbosity)
+    public JsonStructure getTeamEventMatches(String teamKey, String eventKey, String verbosity, PrintStream statusOut)
     {
         String request = "team/" + teamKey + "/event/" + eventKey + "/matches";
         if (verbosity != null) request += "/" + verbosity;
-        return get(request, header);
+        return get(request, statusOut, header);
     }   //getTeamEventMatches
 
     /**
@@ -242,11 +256,12 @@ public class TbaApiV3 extends WebRequest
      *
      * @param teamKey specifies the team key.
      * @param eventKey specifies the event key.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return team event awards data.
      */
-    public JsonStructure getTeamEventAwards(String teamKey, String eventKey)
+    public JsonStructure getTeamEventAwards(String teamKey, String eventKey, PrintStream statusOut)
     {
-        return get("team/" + teamKey + "/event/" + eventKey + "/awards", header);
+        return get("team/" + teamKey + "/event/" + eventKey + "/awards", statusOut, header);
     }   //getTeamEventAwards
 
     /**
@@ -254,11 +269,12 @@ public class TbaApiV3 extends WebRequest
      *
      * @param teamKey specifies the team key.
      * @param eventKey specifies the event key.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return team event status data.
      */
-    public JsonStructure getTeamEventStatus(String teamKey, String eventKey)
+    public JsonStructure getTeamEventStatus(String teamKey, String eventKey, PrintStream statusOut)
     {
-        return get("team/" + teamKey + "/event/" + eventKey + "/status", header);
+        return get("team/" + teamKey + "/event/" + eventKey + "/status", statusOut, header);
     }   //getTeamEventStatus
 
     /**
@@ -266,13 +282,14 @@ public class TbaApiV3 extends WebRequest
      *
      * @param teamKey specifies the team key.
      * @param year specifies the optional year, null for all years.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return team awards data.
      */
-    public JsonStructure getTeamAwards(String teamKey, String year)
+    public JsonStructure getTeamAwards(String teamKey, String year, PrintStream statusOut)
     {
         String request = "team/" + teamKey + "/awards";
         if (year != null) request += "/" + year;
-        return get(request, header);
+        return get(request, statusOut, header);
     }   //getTeamAwards
 
     /**
@@ -281,14 +298,15 @@ public class TbaApiV3 extends WebRequest
      * @param teamKey specifies the team key.
      * @param year specifies the optional year, null for all years.
      * @param verbosity specifies optional verbosity, null for full verbosity.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return team matches data.
      */
-    public JsonStructure getTeamMatches(String teamKey, String year, String verbosity)
+    public JsonStructure getTeamMatches(String teamKey, String year, String verbosity, PrintStream statusOut)
     {
         String request = "team/" + teamKey + "/matches";
         if (year != null) request += "/" + year;
         if (verbosity != null) request += "/" + verbosity;
-        return get(request, header);
+        return get(request, statusOut, header);
     }   //getTeamMatches
 
     /**
@@ -296,22 +314,24 @@ public class TbaApiV3 extends WebRequest
      *
      * @param teamKey specifies the team key.
      * @param year specifies the year.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return team media data.
      */
-    public JsonStructure getTeamMedia(String teamKey, String year)
+    public JsonStructure getTeamMedia(String teamKey, String year, PrintStream statusOut)
     {
-        return get("team/" + teamKey + "/media/" + year, header);
+        return get("team/" + teamKey + "/media/" + year, statusOut, header);
     }   //getTeamMedia
 
     /**
      * This method sends the Team Social Media Request.
      *
      * @param teamKey specifies the team key.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return team social media data.
      */
-    public JsonStructure getTeamSocialMedia(String teamKey)
+    public JsonStructure getTeamSocialMedia(String teamKey, PrintStream statusOut)
     {
-        return get("team/" + teamKey + "/social_media", header);
+        return get("team/" + teamKey + "/social_media", statusOut, header);
     }   //getTeamSocialMedia
 
     /**
@@ -319,13 +339,14 @@ public class TbaApiV3 extends WebRequest
      *
      * @param year specifies the year.
      * @param verbosity specifies optional verbosity, null for full verbosity.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return event list data.
      */
-    public JsonStructure getEvents(String year, String verbosity)
+    public JsonStructure getEvents(String year, String verbosity, PrintStream statusOut)
     {
         String request = "events/" + year;
         if (verbosity != null) request += "/" + verbosity;
-        return get(request, header);
+        return get(request, statusOut, header);
     }   //getEvents
 
     /**
@@ -333,49 +354,53 @@ public class TbaApiV3 extends WebRequest
      *
      * @param eventKey specifies the event key.
      * @param verbosity specifies optional verbosity, null for full verbosity.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return event info data.
      */
-    public JsonStructure getEvent(String eventKey, String verbosity)
+    public JsonStructure getEvent(String eventKey, String verbosity, PrintStream statusOut)
     {
         String request = "event/" + eventKey;
         if (verbosity != null) request += "/" + verbosity;
-        return get(request, header);
-    }   //getEvent 
+        return get(request, statusOut, header);
+    }   //getEvent
 
     /**
      * This method sends the Event Teams Request.
      *
      * @param eventKey specifies the event key.
      * @param verbosity specifies optional verbosity, null for full verbosity.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return event teams data.
      */
-    public JsonStructure getEventTeams(String eventKey, String verbosity)
+    public JsonStructure getEventTeams(String eventKey, String verbosity, PrintStream statusOut)
     {
         String request = "event/" + eventKey + "/teams";
         if (verbosity != null) request += "/" + verbosity;
-        return get(request, header);
+        return get(request, statusOut, header);
     }   //getEventTeams
 
     /**
      * This method sends the Event Alliances Request.
      *
      * @param eventKey specifies the event key.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return event alliances data.
      */
-    public JsonStructure getEventAlliances(String eventKey)
+    public JsonStructure getEventAlliances(String eventKey, PrintStream statusOut)
     {
-        return get("event/" + eventKey + "/alliances", header);
+        return get("event/" + eventKey + "/alliances", statusOut, header);
     }   //getEventAlliances
 
     /**
      * This method sends the Event Insights Request.
      *
      * @param eventKey specifies the event key.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return event insights data.
      */
-    public JsonStructure getEventInsights(String eventKey)
+    public JsonStructure getEventInsights(String eventKey, PrintStream statusOut)
     {
-        return get("event/" + eventKey + "/insights", header);
+        return get("event/" + eventKey + "/insights", statusOut, header);
     }   //getEventInsights
 
     /**
@@ -383,11 +408,12 @@ public class TbaApiV3 extends WebRequest
      *
      * @param eventKey specifies the event key.
      * @param verboseLevel specifies verbose level.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return event OPR data.
      */
-    public JsonStructure getEventOprs(String eventKey, int verboseLevel)
+    public JsonStructure getEventOprs(String eventKey, int verboseLevel, PrintStream statusOut)
     {
-        JsonStructure data = get("event/" + eventKey + "/oprs", header);
+        JsonStructure data = get("event/" + eventKey + "/oprs", statusOut, header);
 
         if (data != null && verboseLevel < 2)
         {
@@ -401,11 +427,12 @@ public class TbaApiV3 extends WebRequest
      * This method sends the Event Predictions Request.
      *
      * @param eventKey specifies the event key.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return event rankings data.
      */
-    public JsonStructure getEventPredictions(String eventKey)
+    public JsonStructure getEventPredictions(String eventKey, PrintStream statusOut)
     {
-        return get("event/" + eventKey + "/predictions", header);
+        return get("event/" + eventKey + "/predictions", statusOut, header);
     }   //getEventPreditions
 
     /**
@@ -413,11 +440,12 @@ public class TbaApiV3 extends WebRequest
      *
      * @param eventKey specifies the event key.
      * @param verboseLevel specifies verbose level.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return event rankings data.
      */
-    public JsonStructure getEventRankings(String eventKey, int verboseLevel)
+    public JsonStructure getEventRankings(String eventKey, int verboseLevel, PrintStream statusOut)
     {
-        JsonStructure data = get("event/" + eventKey + "/rankings", header);
+        JsonStructure data = get("event/" + eventKey + "/rankings", statusOut, header);
 
         if (data != null && verboseLevel < 2)
         {
@@ -432,11 +460,12 @@ public class TbaApiV3 extends WebRequest
      *
      * @param eventKey specifies the event key.
      * @param verboseLevel specifies verbose level.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return event district points data.
      */
-    public JsonStructure getEventDistrictPoints(String eventKey, int verboseLevel)
+    public JsonStructure getEventDistrictPoints(String eventKey, int verboseLevel, PrintStream statusOut)
     {
-        JsonStructure data = get("event/" + eventKey + "/district_points", header);
+        JsonStructure data = get("event/" + eventKey + "/district_points", statusOut, header);
 
         if (data != null && verboseLevel < 2)
         {
@@ -451,35 +480,38 @@ public class TbaApiV3 extends WebRequest
      *
      * @param eventKey specifies the event key.
      * @param verbosity specifies optional verbosity, null for full verbosity.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return event matches data.
      */
-    public JsonStructure getEventMatches(String eventKey, String verbosity)
+    public JsonStructure getEventMatches(String eventKey, String verbosity, PrintStream statusOut)
     {
         String request = "event/" + eventKey + "/matches";
         if (verbosity != null) request += "/" + verbosity;
-        return get(request, header);
+        return get(request, statusOut, header);
     }   //getEventMatches
 
     /**
      * This method sends the Event Awards Request.
      *
      * @param eventKey specifies the event key.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return event awards data.
      */
-    public JsonStructure getEventAwards(String eventKey)
+    public JsonStructure getEventAwards(String eventKey, PrintStream statusOut)
     {
-        return get("event/" + eventKey + "/awards", header);
+        return get("event/" + eventKey + "/awards", statusOut, header);
     }   //getEventAwards
 
     /**
      * This method sends the District List Request.
      *
      * @param year specifies the year.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return district list data.
      */
-    public JsonStructure getDistricts(String year)
+    public JsonStructure getDistricts(String year, PrintStream statusOut)
     {
-        return get("districts/" + year, header);
+        return get("districts/" + year, statusOut, header);
     }   //getDistricts
 
     /**
@@ -487,24 +519,26 @@ public class TbaApiV3 extends WebRequest
      *
      * @param districtKey specifies the district key.
      * @param verbosity specifies optional verbosity, null for full verbosity.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return district teams data.
      */
-    public JsonStructure getDistrictTeams(String districtKey, String verbosity)
+    public JsonStructure getDistrictTeams(String districtKey, String verbosity, PrintStream statusOut)
     {
         String request = "district/" + districtKey + "/teams";
         if (verbosity != null) request += "/" + verbosity;
-        return get(request, header);
+        return get(request, statusOut, header);
     }   //getDistrictTeams
 
     /**
      * This method sends the District Rankings Request.
      *
      * @param districtKey specifies the district key.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return district rankings data.
      */
-    public JsonStructure getDistrictRankings(String districtKey)
+    public JsonStructure getDistrictRankings(String districtKey, PrintStream statusOut)
     {
-        return get("district/" + districtKey + "/rankings", header);
+        return get("district/" + districtKey + "/rankings", statusOut, header);
     }   //getDistrictRankings
 
     /**
@@ -512,13 +546,14 @@ public class TbaApiV3 extends WebRequest
      *
      * @param districtKey specifies the district key.
      * @param verbosity specifies optional verbosity, null for full verbosity.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return district events data.
      */
-    public JsonStructure getDistrictEvents(String districtKey, String verbosity)
+    public JsonStructure getDistrictEvents(String districtKey, String verbosity, PrintStream statusOut)
     {
         String request = "district/" + districtKey + "/events";
         if (verbosity != null) request += "/" + verbosity;
-        return get(request, header);
+        return get(request, statusOut, header);
     }   //getDistrictEvents
 
     /**
@@ -526,13 +561,14 @@ public class TbaApiV3 extends WebRequest
      *
      * @param matchKey specifies the match key.
      * @param verbosity specifies optional verbosity, null for full verbosity.
+     * @param statusOut specifies standard output stream for command status, can be null for quiet mode.
      * @return match data.
      */
-    public JsonStructure getMatch(String matchKey, String verbosity)
+    public JsonStructure getMatch(String matchKey, String verbosity, PrintStream statusOut)
     {
         String request = "match/" + matchKey;
         if (verbosity != null) request += "/" + verbosity;
-        return get(request, header);
+        return get(request, statusOut, header);
     }   //getMatch
 
 }   //class TbaApiV3

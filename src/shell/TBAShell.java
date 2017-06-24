@@ -22,6 +22,8 @@
 
 package shell;
 
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Scanner;
 
 public class TBAShell
@@ -29,6 +31,10 @@ public class TBAShell
     private static final String AUTHOR_ID = "frc492";
     private static final String APP_NAME = "TBAShell";
     private static final String APP_VERSION = "v0.1";
+    private static final InputStream consoleIn = System.in;
+    private static final PrintStream consoleOut = System.out;
+    private static final PrintStream statusOut = System.out;
+    private static final PrintStream dataOut = System.out;
 
     private static TBACommand parser = new TBACommand(AUTHOR_ID, APP_NAME, APP_VERSION);
 
@@ -44,7 +50,7 @@ public class TBAShell
      */
     public static void main(String[] args)
     {
-        Scanner console = args.length == 0? new Scanner(System.in): null;
+        Scanner console = args.length == 0? new Scanner(consoleIn): null;
         boolean done = false;
 
         while (!done)
@@ -54,11 +60,11 @@ public class TBAShell
                 //
                 // Interactive mode: prompt the user for the command, process it and repeat until quit.
                 //
-                System.out.print("\nTBA Command (? for help): ");
+                consoleOut.print("\nTBA Command (? for help): ");
                 String command = console.nextLine().trim();
                 if (command.equals("quit") || command.equals("exit"))
                 {
-                    System.out.println("Program terminated.");
+                    consoleOut.println("Program terminated.");
                     done = true;
                 }
                 else if (command.equals("?"))
@@ -69,9 +75,9 @@ public class TBAShell
                 {
                     printHelpMsg(true);
                 }
-                else
+                else if (parser.processCommand(command.split("\\s+"), dataOut, statusOut) == null)
                 {
-                    parser.processCommand(command.split("\\s+"));
+                    printErrorMsg();
                 }
             }
             else
@@ -79,7 +85,10 @@ public class TBAShell
                 //
                 // Batch mode: process the command and exit.
                 //
-                parser.processCommand(args);
+                if (parser.processCommand(args, dataOut, statusOut) == null)
+                {
+                    printErrorMsg();
+                }
                 done = true;
             }
         }
@@ -97,7 +106,7 @@ public class TBAShell
      */
     private static void printHelpMsg(boolean longVersion)
     {
-        System.out.print(
+        consoleOut.print(
             "\nSyntax: <Command>\n" +
             "<Command>:\n" +
             "\t?\t\t\t\t- Print the short help message.\n" +
@@ -106,7 +115,21 @@ public class TBAShell
             "\texit\t\t\t\t- Exit this program.\n" +
             "\tlist [<Options>] <Model>\t- Retrieve and list model data.\n" +
             "\tget <Request>\t\t\t- Send raw <Request> to the web server.\n");
-        parser.printCommandHelp(longVersion);
+        parser.printCommandHelp(longVersion, consoleOut);
     }   //printHelpMsg
+
+    /**
+     * This method retrieves the error message of the last request. If there is one, the message is printed to
+     * the console.
+     */
+    private static void printErrorMsg()
+    {
+        String errorMsg = parser.getErrorMessage();
+
+        if (errorMsg != null)
+        {
+            consoleOut.println(errorMsg);
+        }
+    }   //printErrorMsg
 
 }   //class TBAShell
