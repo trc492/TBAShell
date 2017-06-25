@@ -7,6 +7,10 @@ This program support two modes of operation:
 ```
 java -jar TBAShell.jar list teams?event=2017cmptx
 ```
+A CMD batch file is also provided in the release folder (TBAShell.cmd). Run it without parameter will run the program in interactive mode. Run it with parameters will run the program in batch mode. The example below runs the program in batch mode and lists the full team info of team 492.
+```
+TBAShell list -2 "teams?team=frc492"
+```
 The syntax of the command line is described below. Terms inside _square brackets_ are optional. Terms inside _parenthesis_ describe a set of choices separated by '|'. Terms inside _angle brackets_ should be substituted by the actual values. Otherwise, everything else should be typed as-is.
 ```
 Syntax: <Command>
