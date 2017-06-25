@@ -127,7 +127,7 @@ public class TBACommand
             "\t-(0|1|2)\t\t\t- Specifies output verbose level (0: minimum, 1: medium, 2: maximum - default is 1).\n" +
             "<Model>:\n" +
             "\tstatus[?team=<TeamKey>&event=<EventKey>]\n" +
-            "\tteams?[(year=<Year>|team=<TeamKey>|event=<EventKey>|district=<DistrictKey>)]\n" +
+            "\tteams[?(year=<Year>|team=<TeamKey>|event=<EventKey>|district=<DistrictKey>)]\n" +
             "\tevents?(year=<Year>|team=<TeamKey>[&year=<Year>]|event=<EventKey>|district=<DistrictKey>)\n" +
             "\tdistricts?(year=<Year>|team=<TeamKey>)\n" +
             "\tmatches?(team=<TeamKey>&year=<Year>|event=<EventKey>[&team=<TeamKey>]|match=<MatchKey>)\n" +

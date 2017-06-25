@@ -21,7 +21,7 @@ Syntax: <Command>
         -(0|1|2)                        - Specifies output verbose level (0: minimum, 1: medium, 2: maximum - default is 1).
 <Model>:
         status[?team=<TeamKey>&event=<EventKey>]
-        teams?[(year=<Year>|team=<TeamKey>|event=<EventKey>|district=<DistrictKey>)]
+        teams[?(year=<Year>|team=<TeamKey>|event=<EventKey>|district=<DistrictKey>)]
         events?(year=<Year>|team=<TeamKey>[&year=<Year>]|event=<EventKey>|district=<DistrictKey>)
         districts?(year=<Year>|team=<TeamKey>)
         matches?(team=<TeamKey>&year=<Year>|event=<EventKey>[&team=<TeamKey>]|match=<MatchKey>)
