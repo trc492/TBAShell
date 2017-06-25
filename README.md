@@ -1,5 +1,5 @@
 # TBAShell
-## A shell interface to TheBlueAlliance.com API v3.
+## A command shell interface to TheBlueAlliance.com API v3.
 
 This program support two modes of operation:
 - **Interactive mode:** The program repeatedly prompts the user for a command line on the console and executes the command until the user types the 'quit' or 'exit' command.
